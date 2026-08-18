@@ -9,7 +9,7 @@
 
 3. Build the physical-device APK
     cd C:\SMDBuild\android
-    gradlew.bat app:assembleRelease -PreactNativeArchitectures=arm64-v8a "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+    .\gradlew.bat app:assembleRelease -PreactNativeArchitectures=arm64-v8a "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
 
 4. Wait until `BUILD SUCCESSFUL`
 
