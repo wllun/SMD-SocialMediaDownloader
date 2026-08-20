@@ -53,8 +53,8 @@ flowchart LR
     W --> D["Browser-managed device download"]
 ~~~
 
-There is no SMD backend in this plan. Downloader preferences are persisted on the
-device with Expo SQLite's localStorage polyfill.
+There is no SMD backend in this plan. Downloader preferences are persisted with
+Expo SQLite on Android/iOS and browser localStorage on web.
 
 ## Important boundaries
 
@@ -66,4 +66,3 @@ device with Expo SQLite's localStorage polyfill.
 - Store distribution still requires legal and app-review assessment.
 
 See [docs/README.md](docs/README.md) for the full documentation index.
-

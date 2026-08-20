@@ -22,16 +22,6 @@ import {
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
 import { DownloadItem, type DownloadItemData } from './download-item';
-import { SourceChip } from './source-chip';
-
-const sourceTypes = [
-  { symbol: '◎', label: 'Instagram' },
-  { symbol: '♪', label: 'TikTok' },
-  { symbol: 'f', label: 'Facebook' },
-  { symbol: '小', label: 'XHS' },
-  { symbol: 'X', label: 'X' },
-  { symbol: '抖', label: 'Douyin' },
-] as const;
 
 const initialDownloads: DownloadItemData[] = [
   { id: '1', title: 'Mountain sunrise', meta: 'MP4  ·  1080p', date: 'Today' },
@@ -316,15 +306,6 @@ export function HomeScreen() {
             )}
             <AppText variant="button">{isAnalyzing ? 'Analyzing…' : 'Download'}</AppText>
           </Pressable>
-        </View>
-      </View>
-
-      <View style={{ gap: spacing.lg }}>
-        <AppText variant="headline">Supported link detection</AppText>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {sourceTypes.map((source) => (
-            <SourceChip key={source.label} {...source} />
-          ))}
         </View>
       </View>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -13,10 +13,14 @@ import {
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
 export function SettingsScreen() {
-  const [downloaders, setDownloaders] = useState<DownloaderSettings>(() =>
-    getDownloaderSettings(),
-  );
+  const [downloaders, setDownloaders] = useState<DownloaderSettings>({
+    ...emptyDownloaderSettings,
+  });
   const [message, setMessage] = useState<string>();
+
+  useEffect(() => {
+    setDownloaders(getDownloaderSettings());
+  }, []);
 
   function updateDownloader(id: keyof DownloaderSettings, value: string) {
     setDownloaders((current) => ({ ...current, [id]: value }));

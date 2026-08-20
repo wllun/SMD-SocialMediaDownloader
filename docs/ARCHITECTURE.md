@@ -16,7 +16,7 @@
 ### Settings
 
 - Stores one HTTPS website URL per platform.
-- Uses Expo SQLite's localStorage polyfill for device persistence.
+- Uses Expo SQLite persistence on Android/iOS and browser localStorage on web.
 - Supports {url} as an encoded-link placeholder.
 - Allows all external website preferences to be cleared.
 
@@ -55,4 +55,3 @@ advertisements, cookies, files, or final download behavior.
 
 There is no current SMD backend, social OAuth connection, job queue, or server
 media storage.
-
