@@ -1,38 +1,19 @@
-# ADR 0003: Use private, short-lived storage for server-processed media
+# ADR 0003: Use ephemeral server media storage
 
-**Status:** Accepted  
-**Date:** 2026-08-17
+**Status:** Superseded by ADR 0004  
+**Date:** 2026-08-17  
+**Superseded:** 2026-08-20
 
-## Context
+## Original decision
 
-Some authorized workflows may require server-side retrieval or conversion. Long-
-term storage increases privacy, copyright, security, and infrastructure cost.
+Server-processed media would use private object storage, signed URLs, and automatic
+deletion.
 
-## Decision
+## Reason for supersession
 
-Server-processed media will use private object storage with short-lived signed
-delivery URLs and automatic lifecycle deletion. The proposed maximum retention is
-24 hours after completion, subject to reduction and final product/legal approval.
-Partial and failed artifacts should be deleted immediately or within one hour.
+The current architecture has no SMD server processing or object storage. The
+external website and browser control social-media downloads. Direct file URLs are
+downloaded by the app without SMD server storage.
 
-## Consequences
-
-- Users must save completed files before expiry.
-- The application must clearly display expiration.
-- Lifecycle deletion needs metrics, alerts, and periodic verification.
-- Reprocessing may be required after expiry.
-- History should retain minimal metadata, not the media itself.
-
-## Alternatives considered
-
-### Permanent cloud media library by default
-
-Rejected for the MVP because it expands consent, retention, security, moderation,
-copyright, and cost requirements.
-
-### On-device processing only
-
-Preferred where feasible, but not sufficient for every approved social workflow or
-large media conversion. The system should still choose local or direct-to-device
-processing when it can meet reliability and platform requirements.
+This decision must be reconsidered if server processing returns.
 

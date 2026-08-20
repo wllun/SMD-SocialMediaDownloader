@@ -1,39 +1,19 @@
-# ADR 0002: Isolate platforms behind capability-based adapters
+# ADR 0002: Isolate platforms behind API adapters
 
-**Status:** Accepted  
-**Date:** 2026-08-17
+**Status:** Superseded by ADR 0004  
+**Date:** 2026-08-17  
+**Superseded:** 2026-08-20
 
-## Context
+## Original decision
 
-Social platforms provide different media types, OAuth scopes, API fields, rate
-limits, authorization rules, and download permissions. Their APIs can change on
-independent schedules.
+The proposed backend would isolate official social APIs behind platform adapters.
 
-## Decision
+## Reason for supersession
 
-Each platform will implement a shared adapter contract and declare its actual
-capabilities. Domain services will depend on the contract rather than provider
-payloads. Provider-specific identifiers, errors, and metadata remain inside the
-adapter boundary.
+The product changed to a client-only browser handoff. SMD no longer operates
+platform adapters or a media-resolution backend. Platform configuration is now a
+local mapping from detected host to user-provided HTTPS website.
 
-## Consequences
-
-- An adapter can be tested, deployed, rate-limited, or disabled independently.
-- The UI must render capabilities instead of assuming feature parity.
-- Shared contract design requires care to avoid reducing every provider to the
-  lowest common denominator.
-- Contract tests and sanitized provider fixtures become mandatory.
-
-## Alternatives considered
-
-### Platform logic inside controllers
-
-Rejected because it tightly couples HTTP endpoints to provider behavior and makes
-changes difficult to test or isolate.
-
-### Separate service for every platform from day one
-
-Deferred because the operational overhead is unnecessary for the initial scale.
-Adapters may later move behind service boundaries without changing the domain
-contract.
+This record remains as history and applies again only if an approved backend is
+introduced.
 

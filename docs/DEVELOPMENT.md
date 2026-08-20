@@ -1,124 +1,48 @@
 # Development Guide
 
-**Status:** Proposed until the repository is scaffolded
+**Status:** Current
 
-## 1. Proposed monorepo layout
+## Project layout
 
-```text
-apps/
-  mobile/
-    app/                  # Expo Router routes
-    src/
-      components/
-      features/
-      hooks/
-      services/
-      stores/
-      theme/
-      types/
-  api/
-    src/
-      auth/
-      connections/
-      downloads/
-      media/
-      platform-adapters/
-      users/
-workers/
-  media-worker/
-packages/
-  contracts/              # Shared schemas and generated API types
-  config/
-  validation/
-infrastructure/
-docs/
-```
+~~~text
+assets/                 App icons and splash assets
+docs/                   Product and engineering documentation
+src/app/                Expo Router routes
+src/components/         Shared UI components
+src/screens/            Home, Library, and Settings screens
+src/services/           Detection, settings, and direct downloads
+src/theme/              Design tokens
+app.json                Expo configuration
+package.json            Commands and dependencies
+~~~
 
-This is a layout for a new project. Do not restructure an established codebase
-solely to match this proposal once implementation has begun.
+## Commands
 
-## 2. Proposed tools
+~~~powershell
+npm install
+npm start
+npm run typecheck
+npm run export:web
+~~~
 
-- TypeScript with strict mode.
-- React Native and Expo for mobile.
-- Expo Router for navigation.
-- Node.js with NestJS or Fastify for the API.
-- PostgreSQL, Redis/BullMQ, and S3-compatible storage.
-- A workspace package manager selected during scaffolding.
-- ESLint, Prettier, type checking, unit tests, and dependency auditing.
+Use Expo Go first. APK generation is documented in
+[1_MY_DEV_NOTE.md](1_MY_DEV_NOTE.md).
 
-Pin the runtime and package-manager versions in the repository. Commit the lockfile.
+## Conventions
 
-## 3. Environment configuration
+- Keep platform hosts centralized in src/services/downloader-settings.ts.
+- Match hosts exactly or as real subdomains; never use substring matching.
+- Require HTTPS for external downloader settings.
+- Display the destination domain before leaving SMD.
+- Never ship a default third-party downloader without review and permission.
+- Never store credentials, access tokens, cookies, or passwords in settings.
+- Update documentation whenever supported platforms or behavior changes.
 
-Provide `.env.example` files containing names and safe descriptions only. Never
-commit real secrets.
+## Definition of done
 
-Expected configuration categories:
-
-- Public API origin and mobile deep-link scheme.
-- Database and Redis connections.
-- Object-storage bucket, region, and endpoint.
-- Authentication provider configuration.
-- Per-platform OAuth client identifiers and server-side secrets.
-- Encryption or key-management identifiers.
-- Retention limits, upload limits, and feature flags.
-- Logging, tracing, crash reporting, and release environment.
-
-Validate environment variables at application startup and fail closed if required
-security configuration is absent.
-
-## 4. Branch and review workflow
-
-- Create focused branches from the primary branch.
-- Keep commits small enough to review and revert.
-- Require review for changes to authentication, authorization, platform adapters,
-  storage, media processing, privacy, or infrastructure.
-- Include tests and documentation with behavioral changes.
-- Never mix unrelated formatting or refactoring into a security-sensitive change.
-- Use ADRs for decisions that materially affect architecture, compliance, cost, or
-  future integrations.
-
-## 5. Coding conventions
-
-- Validate inputs at trust boundaries with shared schemas.
-- Use explicit domain types for identifiers, platform names, job states, and errors.
-- Do not expose provider-specific payloads beyond an adapter boundary.
-- Pass cancellation and deadlines through network and processing operations.
-- Avoid logging whole requests, responses, headers, URLs, or media metadata.
-- Use structured error codes; do not parse human-readable provider messages.
-- Keep controllers thin and business rules in tested services.
-- Make deletion and revocation operations idempotent.
-
-## 6. Definition of done
-
-A change is complete when:
-
-- Acceptance criteria are met.
-- Type checking, linting, and relevant tests pass.
-- Authorization and failure paths are tested.
-- Logs and analytics contain no new sensitive data.
-- Documentation and API contracts are updated.
-- Database changes include forward and rollback considerations.
-- New configuration is documented with safe defaults.
-- Security-sensitive changes receive appropriate review.
-- User-visible behavior is accessible and has clear error messaging.
-
-## 7. Dependency rules
-
-- Prefer maintained packages with clear ownership and licensing.
-- Review native modules for current Expo and platform compatibility.
-- Avoid packages that scrape social platforms, collect cookies, or bypass controls.
-- Keep FFmpeg and media parsing dependencies patched.
-- Run dependency, license, and secret checks in CI.
-- Document any dependency that has access to tokens, files, network traffic, or
-  analytics data.
-
-## 8. Documentation workflow
-
-- Update [PROJECT_STATE.md](PROJECT_STATE.md) after milestone or blocker changes.
-- Update [API_DESIGN.md](API_DESIGN.md) before merging API contract changes.
-- Update [SECURITY_AND_COMPLIANCE.md](SECURITY_AND_COMPLIANCE.md) when data,
-  permissions, retention, or platform behavior changes.
-- Add an ADR under `docs/decisions/` for durable decisions.
+- TypeScript passes.
+- The production web export succeeds.
+- Android and iOS behavior is checked where relevant.
+- URL validation, clipboard, confirmation, and browser launch are verified.
+- Documentation reflects the implementation.
 

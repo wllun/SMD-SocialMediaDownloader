@@ -1,3 +1,7 @@
+# Local APK Build Notes
+
+The Expo project lives at the repository root. Run these commands in PowerShell.
+
 1. Copy the latest code to the short build folder
     `robocopy "C:\Users\behwl\OneDrive\Documents\ReactNative\SMD-SocialMediaDownloader" "C:\SMDBuild" /E /XD .git node_modules android ios .expo dist web-build`
     [Company Laptop Cmd] : `robocopy "C:\Users\User\Desktop\React App\SMD-SocialMediaDownloader" "C:\SMDBuild" /E /XD .git node_modules android ios .expo dist web-build`

@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
+  Linking,
   Pressable,
   ScrollView,
   TextInput,
@@ -13,18 +14,23 @@ import {
 import { AppText } from '@/components/app-text';
 import { SurfaceCard } from '@/components/surface-card';
 import { downloadMedia } from '@/services/download-media';
+import {
+  buildDownloaderUrl,
+  detectSocialPlatform,
+  getDownloaderSettings,
+} from '@/services/downloader-settings';
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
 import { DownloadItem, type DownloadItemData } from './download-item';
 import { SourceChip } from './source-chip';
 
 const sourceTypes = [
-  { symbol: '▷', label: 'Video' },
-  { symbol: '▣', label: 'Clips' },
-  { symbol: '◉', label: 'Photos' },
-  { symbol: '♪', label: 'Music' },
-  { symbol: '◇', label: 'Social' },
-  { symbol: '•••', label: 'More' },
+  { symbol: '◎', label: 'Instagram' },
+  { symbol: '♪', label: 'TikTok' },
+  { symbol: 'f', label: 'Facebook' },
+  { symbol: '小', label: 'XHS' },
+  { symbol: 'X', label: 'X' },
+  { symbol: '抖', label: 'Douyin' },
 ] as const;
 
 const initialDownloads: DownloadItemData[] = [
@@ -64,6 +70,7 @@ export function HomeScreen() {
     () => downloads.find((item) => item.progress !== undefined),
     [downloads],
   );
+  const detectedPlatform = useMemo(() => detectSocialPlatform(url), [url]);
 
   async function handlePaste() {
     try {
@@ -83,29 +90,79 @@ export function HomeScreen() {
       return;
     }
 
-    if (!isDirectMediaUrl(url)) {
-      setError('For now, enter a direct media URL ending in a supported file extension.');
+    const socialPlatform = detectSocialPlatform(url);
+    if (!isDirectMediaUrl(url) && !socialPlatform) {
+      setError('Enter a direct media URL or a supported social-media post URL.');
       return;
     }
 
     setError(undefined);
     setIsAnalyzing(true);
 
+    if (socialPlatform) {
+      try {
+        const downloaderTemplate = getDownloaderSettings()[socialPlatform.id];
+        if (!downloaderTemplate) {
+          throw new Error(`Set a downloader website for ${socialPlatform.label} in Settings first.`);
+        }
+
+        const downloaderUrl = buildDownloaderUrl(downloaderTemplate, url.trim());
+        const downloaderHost = new URL(downloaderUrl).hostname;
+        await Clipboard.setStringAsync(url.trim());
+
+        const shouldOpen = await new Promise<boolean>((resolve) => {
+          Alert.alert(
+            `Open ${socialPlatform.label} downloader?`,
+            `The post link was copied. You are leaving SMD and opening ${downloaderHost}. Only continue if you trust this website.`,
+            [
+              { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+              { text: 'Open website', onPress: () => resolve(true) },
+            ],
+            { cancelable: true, onDismiss: () => resolve(false) },
+          );
+        });
+
+        if (shouldOpen) {
+          await Linking.openURL(downloaderUrl);
+          setUrl('');
+        }
+      } catch (openError) {
+        setError(openError instanceof Error ? openError.message : 'Could not open the downloader.');
+      } finally {
+        setIsAnalyzing(false);
+      }
+      return;
+    }
+
     const hostname = new URL(url.trim()).hostname.replace(/^www\./, '');
     const id = String(Date.now());
     const title = `Media from ${hostname}`;
 
     setDownloads((current) => [
-      { id, title, meta: 'Direct file', date: 'Downloading', progress: 0 },
+      {
+        id,
+        title,
+        meta: 'Direct file',
+        date: 'Downloading',
+        progress: 0,
+      },
       ...current,
     ]);
 
     try {
-      const result = await downloadMedia(url.trim(), (progress) => {
-        setDownloads((current) =>
-          current.map((item) => (item.id === id ? { ...item, progress } : item)),
-        );
-      });
+      const mediaUrls = [url.trim()];
+      let result: Awaited<ReturnType<typeof downloadMedia>> | undefined;
+
+      for (let index = 0; index < mediaUrls.length; index += 1) {
+        result = await downloadMedia(mediaUrls[index], (assetProgress) => {
+          const progress = Math.round(((index + assetProgress / 100) / mediaUrls.length) * 100);
+          setDownloads((current) =>
+            current.map((item) => (item.id === id ? { ...item, progress } : item)),
+          );
+        });
+      }
+
+      if (!result) throw new Error('No downloadable media was returned.');
 
       const location =
         result.savedTo === 'device-library'
@@ -121,7 +178,10 @@ export function HomeScreen() {
             : item,
         ),
       );
-      Alert.alert('Download complete', location);
+      Alert.alert(
+        'Download complete',
+        mediaUrls.length > 1 ? `${mediaUrls.length} files saved. ${location}.` : location,
+      );
       setUrl('');
     } catch (downloadError) {
       const message =
@@ -223,6 +283,13 @@ export function HomeScreen() {
             </AppText>
           ) : null}
 
+          {!error && detectedPlatform ? (
+            <AppText variant="caption" style={{ color: colors.success }}>
+              Detected: {detectedPlatform.label}. The post link will be copied before opening its
+              configured downloader.
+            </AppText>
+          ) : null}
+
           <Pressable
             accessibilityRole="button"
             disabled={isAnalyzing}
@@ -253,8 +320,8 @@ export function HomeScreen() {
       </View>
 
       <View style={{ gap: spacing.lg }}>
-        <AppText variant="headline">Works with your favorite platforms</AppText>
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <AppText variant="headline">Supported link detection</AppText>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {sourceTypes.map((source) => (
             <SourceChip key={source.label} {...source} />
           ))}
