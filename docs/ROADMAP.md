@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status:** Revised for external-browser handoff
+**Status:** Revised for in-app WebView handoff
 
 ## Completed
 
@@ -8,13 +8,14 @@
 - Direct media-file downloading.
 - Detection for Instagram, TikTok, Facebook, XHS, X, and Douyin.
 - Persistent platform-specific website settings.
-- Clipboard copy, destination confirmation, and default-browser launch.
+- Clipboard copy, destination confirmation, and in-app WebView launch.
+- HTTPS navigation controls, native download interception, and browser fallback.
 - Removal of the temporary Instagram API adapter.
 
 ## Next
 
 - Add unit tests for hostname detection and {url} generation.
-- Perform Android and iOS browser/device testing.
+- Perform Android and iOS WebView/device-save testing on configured sites.
 - Replace mock Library entries with real history or remove them.
 - Improve accessibility and localized error labels.
 
@@ -31,4 +32,3 @@
 - Social account password or cookie collection.
 - A backend queue, FFmpeg worker, or temporary media bucket.
 - DRM, watermark, paywall, or access-control circumvention.
-

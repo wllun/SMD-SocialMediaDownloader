@@ -1,6 +1,6 @@
 # ADR 0004: Use configurable external-browser handoff
 
-**Status:** Accepted  
+**Status:** Superseded by ADR 0005
 **Date:** 2026-08-20
 
 ## Context
@@ -32,8 +32,10 @@ SMD will not embed the external website in a WebView or intercept its download.
 Rejected because download behavior differs by platform and embedding an untrusted
 site increases phishing, popup, cookie, and native download-handling risk.
 
+This rejection was reversed after the product requirement changed to keep the
+configured site inside SMD. ADR 0005 records the added controls and fallback.
+
 ### Official API backend
 
 Superseded for the current plan because it requires approval, tokens, server
 infrastructure, and per-platform work.
-

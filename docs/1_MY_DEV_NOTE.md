@@ -1,6 +1,8 @@
 # Local APK Build Notes
 
 The Expo project lives at the repository root. Run these commands in PowerShell.
+The clean prebuild step is required after adding or updating native dependencies
+such as react-native-webview.
 
 1. Copy the latest code to the short build folder
     `robocopy "C:\Users\behwl\OneDrive\Documents\ReactNative\SMD-SocialMediaDownloader" "C:\SMDBuild" /E /XD .git node_modules android ios .expo dist web-build`

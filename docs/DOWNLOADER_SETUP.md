@@ -9,7 +9,7 @@ website separately for each supported social platform.
 2. Enter an HTTPS website URL under the appropriate platform.
 3. Press **Save downloader websites**.
 4. Return Home and paste a post link.
-5. Review the external destination before opening it.
+5. Review the external destination before opening it inside SMD.
 
 For websites that accept an input URL in their address, use {url}:
 
@@ -29,5 +29,7 @@ link so it can be pasted there.
 - Use downloaded material only when you own it or have permission.
 - Clear a configured site if its ownership or behavior changes.
 
-SMD does not endorse, monitor, or guarantee user-configured websites.
+On Android and iOS, the site opens in SMD. Use **Browser ↗** if a site refuses to
+run in a WebView or its download does not work there. On web, SMD opens a new tab.
 
+SMD does not endorse, monitor, or guarantee user-configured websites.

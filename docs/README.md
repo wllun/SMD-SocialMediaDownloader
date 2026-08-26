@@ -9,7 +9,7 @@ user-configured external downloader websites.
 | --- | --- |
 | [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) | Current behavior and acceptance criteria |
 | [PROJECT_STATE.md](PROJECT_STATE.md) | Implemented features and limitations |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Local settings and browser handoff |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Local settings and in-app WebView handoff |
 | [API_DESIGN.md](API_DESIGN.md) | Current no-backend decision |
 | [DOWNLOADER_SETUP.md](DOWNLOADER_SETUP.md) | Configure external websites |
 | [SECURITY_AND_COMPLIANCE.md](SECURITY_AND_COMPLIANCE.md) | Trust and safe-use requirements |
@@ -20,5 +20,4 @@ user-configured external downloader websites.
 | [1_MY_DEV_NOTE.md](1_MY_DEV_NOTE.md) | Local APK build commands |
 
 Documentation and code must be updated together whenever supported hosts,
-settings behavior, browser handoff, or product boundaries change.
-
+settings behavior, WebView handoff, or product boundaries change.

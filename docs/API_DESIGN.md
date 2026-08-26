@@ -2,7 +2,7 @@
 
 **Status:** Not applicable to the current release
 
-SMD does not operate a backend API in the external-browser plan. The removed
+SMD does not operate a backend API in the in-app WebView plan. The removed
 Instagram resolver endpoint and server-held Meta token are no longer part of the
 application.
 
@@ -16,11 +16,10 @@ https://trusted-downloader.example/?url={url}
 ~~~
 
 SMD replaces every {url} token with encodeURIComponent(postUrl) before opening
-the system browser. This is string substitution, not an API guarantee.
+the in-app downloader. This is string substitution, not an API guarantee.
 
 ## Future API conditions
 
 Any future backend requires a new accepted architecture decision covering user
 authentication, authorization, rate limits, secret storage, abuse prevention,
 privacy, observability, and deployment ownership.
-

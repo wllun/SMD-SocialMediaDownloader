@@ -1,10 +1,10 @@
 import * as Clipboard from 'expo-clipboard';
+import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Keyboard,
-  Linking,
   Pressable,
   ScrollView,
   TextInput,
@@ -103,17 +103,22 @@ export function HomeScreen() {
         const shouldOpen = await new Promise<boolean>((resolve) => {
           Alert.alert(
             `Open ${socialPlatform.label} downloader?`,
-            `The post link was copied. You are leaving SMD and opening ${downloaderHost}. Only continue if you trust this website.`,
+            `The post link was copied. SMD will open ${downloaderHost} inside the app. Only continue if you trust this website.`,
             [
               { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
-              { text: 'Open website', onPress: () => resolve(true) },
+              { text: 'Open in SMD', onPress: () => resolve(true) },
             ],
             { cancelable: true, onDismiss: () => resolve(false) },
           );
         });
 
         if (shouldOpen) {
-          await Linking.openURL(downloaderUrl);
+          router.push(
+            {
+              pathname: '/downloader',
+              params: { platform: socialPlatform.label, url: downloaderUrl },
+            } as unknown as Href,
+          );
           setUrl('');
         }
       } catch (openError) {
