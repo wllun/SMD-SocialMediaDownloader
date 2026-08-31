@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -12,15 +12,45 @@ import {
 } from '@/services/downloader-settings';
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
+type Feedback = { tone: 'success' | 'error'; text: string };
+
+function getUrlError(value: string) {
+  if (!value.trim()) return 'Enter a downloader website URL or remove this row.';
+  try {
+    const url = new URL(value.trim().replace('{url}', 'https%3A%2F%2Fexample.com%2Fpost'));
+    if (url.protocol !== 'https:') return 'Use a secure HTTPS address.';
+  } catch {
+    return 'Enter a complete URL, such as https://example.com.';
+  }
+  return undefined;
+}
+
 export function SettingsScreen() {
   const [downloaders, setDownloaders] = useState<DownloaderSettings>(() =>
     createEmptyDownloaderSettings(),
   );
-  const [message, setMessage] = useState<string>();
+  const [feedback, setFeedback] = useState<Feedback>();
+  const [touchedWebsiteIds, setTouchedWebsiteIds] = useState<Record<string, boolean>>({});
+  const [savedSnapshot, setSavedSnapshot] = useState(() =>
+    JSON.stringify(createEmptyDownloaderSettings()),
+  );
 
   useEffect(() => {
-    setDownloaders(getDownloaderSettings());
+    const stored = getDownloaderSettings();
+    setDownloaders(stored);
+    setSavedSnapshot(JSON.stringify(stored));
   }, []);
+
+  const currentSnapshot = useMemo(() => JSON.stringify(downloaders), [downloaders]);
+  const hasUnsavedChanges = currentSnapshot !== savedSnapshot;
+  const configuredCount = useMemo(
+    () =>
+      socialPlatforms.filter((platform) =>
+        downloaders[platform.id].websites.length > 0 &&
+        downloaders[platform.id].websites.every((website) => !getUrlError(website.url)),
+      ).length,
+    [downloaders],
+  );
 
   function updateDownloader(
     platformId: keyof DownloaderSettings,
@@ -36,7 +66,7 @@ export function SettingsScreen() {
         ),
       },
     }));
-    setMessage(undefined);
+    setFeedback(undefined);
   }
 
   function addDownloader(platformId: keyof DownloaderSettings) {
@@ -51,7 +81,7 @@ export function SettingsScreen() {
         },
       };
     });
-    setMessage(undefined);
+    setFeedback(undefined);
   }
 
   function removeDownloader(platformId: keyof DownloaderSettings, websiteId: string) {
@@ -69,7 +99,12 @@ export function SettingsScreen() {
         },
       };
     });
-    setMessage(undefined);
+    setTouchedWebsiteIds((current) => {
+      const next = { ...current };
+      delete next[websiteId];
+      return next;
+    });
+    setFeedback(undefined);
   }
 
   function setDefaultDownloader(platformId: keyof DownloaderSettings, websiteId: string) {
@@ -77,16 +112,36 @@ export function SettingsScreen() {
       ...current,
       [platformId]: { ...current[platformId], defaultWebsiteId: websiteId },
     }));
-    setMessage(undefined);
+    setFeedback(undefined);
   }
 
   function handleSave() {
+    const invalidWebsites = socialPlatforms.flatMap((platform) =>
+      downloaders[platform.id].websites.filter((website) => getUrlError(website.url)),
+    );
+    if (invalidWebsites.length > 0) {
+      setTouchedWebsiteIds((current) => ({
+        ...current,
+        ...Object.fromEntries(invalidWebsites.map((website) => [website.id, true])),
+      }));
+      setFeedback({
+        tone: 'error',
+        text: `Fix ${invalidWebsites.length} invalid ${invalidWebsites.length === 1 ? 'URL' : 'URLs'} before saving.`,
+      });
+      return;
+    }
+
     try {
       const saved = saveDownloaderSettings(downloaders);
       setDownloaders(saved);
-      setMessage('Downloader websites saved on this device.');
+      setSavedSnapshot(JSON.stringify(saved));
+      setTouchedWebsiteIds({});
+      setFeedback({ tone: 'success', text: 'Downloader websites saved on this device.' });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not save settings.');
+      setFeedback({
+        tone: 'error',
+        text: error instanceof Error ? error.message : 'Could not save settings.',
+      });
     }
   }
 
@@ -99,7 +154,9 @@ export function SettingsScreen() {
         onPress: () => {
           const cleared = saveDownloaderSettings(createEmptyDownloaderSettings());
           setDownloaders(cleared);
-          setMessage('All downloader websites cleared.');
+          setSavedSnapshot(JSON.stringify(cleared));
+          setTouchedWebsiteIds({});
+          setFeedback({ tone: 'success', text: 'All downloader websites cleared.' });
         },
       },
     ]);
@@ -122,15 +179,44 @@ export function SettingsScreen() {
       <View style={{ gap: spacing.sm }}>
         <AppText variant="display">Settings</AppText>
         <AppText variant="body" style={{ color: colors.inkMuted }}>
-          Choose which external website handles each social platform.
+          Choose trusted downloader websites and decide which one each platform uses by default.
         </AppText>
       </View>
 
-      <SurfaceCard style={{ gap: spacing.sm }}>
-        <AppText variant="headline">How it works</AppText>
+      <SurfaceCard
+        style={{
+          gap: spacing.md,
+          backgroundColor: colors.skySoft,
+          borderColor: colors.accentSoft,
+          boxShadow: 'none',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <View style={{ flex: 1, gap: spacing.xs }}>
+            <AppText variant="headline">Downloader setup</AppText>
+            <AppText variant="subhead">
+              {configuredCount} of {socialPlatforms.length} platforms configured
+            </AppText>
+          </View>
+          <View
+            accessibilityLabel={`${configuredCount} of ${socialPlatforms.length} platforms configured`}
+            style={{
+              minWidth: sizes.minimumTouch,
+              height: sizes.minimumTouch,
+              paddingHorizontal: spacing.md,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: radius.full,
+              backgroundColor: colors.surface,
+            }}
+          >
+            <AppText variant="bodyMedium" style={{ color: colors.accent, fontVariant: ['tabular-nums'] }}>
+              {configuredCount}/{socialPlatforms.length}
+            </AppText>
+          </View>
+        </View>
         <AppText variant="subhead">
-          SMD copies the post link and opens your configured website in the device browser. The
-          external website and browser control the download.
+          SMD copies the post link before opening the default website. HTTPS addresses only.
         </AppText>
       </SurfaceCard>
 
@@ -138,66 +224,99 @@ export function SettingsScreen() {
         <View style={{ gap: spacing.xs }}>
           <AppText variant="section">Downloader websites</AppText>
           <AppText variant="subhead">
-            HTTPS only. Add {'{url}'} where a website accepts a prefilled encoded post link.
+            Add {'{url}'} to an address when the website supports a prefilled post link.
           </AppText>
         </View>
 
         {socialPlatforms.map((platform) => {
           const setting = downloaders[platform.id];
+          const isConfigured =
+            setting.websites.length > 0 &&
+            setting.websites.every((website) => !getUrlError(website.url));
           return (
-            <SurfaceCard key={platform.id} style={{ gap: spacing.md }}>
-              <AppText variant="headline">{platform.label}</AppText>
+            <SurfaceCard key={platform.id} style={{ gap: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <View style={{ flex: 1, gap: spacing.xs }}>
+                  <AppText variant="headline">{platform.label}</AppText>
+                  <AppText variant="caption">
+                    {setting.websites.length === 0
+                      ? 'Not configured'
+                      : `${setting.websites.length} ${setting.websites.length === 1 ? 'website' : 'websites'}`}
+                  </AppText>
+                </View>
+                {isConfigured ? (
+                  <View
+                    style={{
+                      paddingHorizontal: spacing.md,
+                      paddingVertical: spacing.sm,
+                      borderRadius: radius.full,
+                      backgroundColor: colors.mintSoft,
+                    }}
+                  >
+                    <AppText variant="caption" style={{ color: colors.success }}>
+                      Configured
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+
+              {setting.websites.length === 0 ? (
+                <View
+                  style={{
+                    padding: spacing.lg,
+                    gap: spacing.xs,
+                    borderRadius: radius.md,
+                    borderCurve: 'continuous',
+                    backgroundColor: colors.background,
+                  }}
+                >
+                  <AppText variant="bodyMedium">No downloader added</AppText>
+                  <AppText variant="subhead">
+                    Add a trusted HTTPS website to enable {platform.label} links.
+                  </AppText>
+                </View>
+              ) : null}
 
               {setting.websites.map((website, index) => {
                 const isDefault = website.id === setting.defaultWebsiteId;
+                const fieldError = touchedWebsiteIds[website.id]
+                  ? getUrlError(website.url)
+                  : undefined;
                 return (
-                  <View key={website.id} style={{ gap: spacing.sm }}>
+                  <View
+                    key={website.id}
+                    style={{
+                      gap: spacing.md,
+                      padding: spacing.md,
+                      borderWidth: 1,
+                      borderColor: fieldError
+                        ? colors.danger
+                        : isDefault
+                          ? colors.accent
+                          : colors.borderSoft,
+                      borderRadius: radius.md,
+                      borderCurve: 'continuous',
+                      backgroundColor: isDefault ? colors.accentSoft : colors.background,
+                    }}
+                  >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Pressable
-                        accessibilityRole="radio"
-                        accessibilityState={{ checked: isDefault }}
-                        accessibilityLabel={`Use ${platform.label} URL ${index + 1} by default`}
-                        onPress={() => setDefaultDownloader(platform.id, website.id)}
-                        style={({ pressed }) => ({
-                          minHeight: sizes.minimumTouch,
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: spacing.sm,
-                          opacity: pressed ? 0.6 : 1,
-                        })}
-                      >
-                        <View
-                          style={{
-                            width: 20,
-                            height: 20,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: radius.full,
-                            borderWidth: 2,
-                            borderColor: isDefault ? colors.accent : colors.border,
-                          }}
-                        >
-                          {isDefault ? (
-                            <View
-                              style={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: radius.full,
-                                backgroundColor: colors.accent,
-                              }}
-                            />
-                          ) : null}
-                        </View>
-                        <AppText variant="caption" style={{ color: colors.inkMuted }}>
-                          {isDefault ? 'Default' : 'Set as default'}
+                      <View style={{ flex: 1, gap: spacing.xxs }}>
+                        <AppText variant="bodyMedium">Website {index + 1}</AppText>
+                        <AppText variant="caption">
+                          {isDefault ? 'Used automatically for this platform' : 'Available as an alternative'}
                         </AppText>
-                      </Pressable>
-
+                      </View>
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Remove ${platform.label} URL ${index + 1}`}
                         onPress={() => removeDownloader(platform.id, website.id)}
-                        style={({ pressed }) => ({ marginLeft: 'auto', opacity: pressed ? 0.55 : 1 })}
+                        style={({ pressed }) => ({
+                          minWidth: sizes.minimumTouch,
+                          minHeight: sizes.minimumTouch,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: pressed ? 0.55 : 1,
+                        })}
                       >
                         <AppText variant="caption" style={{ color: colors.danger }}>
                           Remove
@@ -205,11 +324,18 @@ export function SettingsScreen() {
                       </Pressable>
                     </View>
 
+                    <AppText variant="caption" style={{ color: colors.ink }}>
+                      Downloader URL
+                    </AppText>
                     <TextInput
                       accessibilityLabel={`${platform.label} downloader website URL ${index + 1}`}
+                      accessibilityHint="Enter a secure website address. You may include the URL placeholder."
                       autoCapitalize="none"
                       autoCorrect={false}
                       keyboardType="url"
+                      onBlur={() =>
+                        setTouchedWebsiteIds((current) => ({ ...current, [website.id]: true }))
+                      }
                       onChangeText={(value) => updateDownloader(platform.id, website.id, value)}
                       placeholder="https://trusted-downloader.example/"
                       placeholderTextColor={colors.inkFaint}
@@ -219,7 +345,7 @@ export function SettingsScreen() {
                           minHeight: sizes.input,
                           color: colors.ink,
                           backgroundColor: colors.background,
-                          borderColor: isDefault ? colors.accent : colors.border,
+                          borderColor: fieldError ? colors.danger : isDefault ? colors.accent : colors.border,
                           borderWidth: 1,
                           borderRadius: radius.md,
                           borderCurve: 'continuous',
@@ -228,23 +354,77 @@ export function SettingsScreen() {
                       ]}
                       value={website.url}
                     />
+
+                    {fieldError ? (
+                      <AppText accessibilityRole="alert" variant="caption" style={{ color: colors.danger }}>
+                        {fieldError}
+                      </AppText>
+                    ) : null}
+
+                    <Pressable
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: isDefault }}
+                      accessibilityLabel={`Use ${platform.label} website ${index + 1} by default`}
+                      onPress={() => setDefaultDownloader(platform.id, website.id)}
+                      style={({ pressed }) => ({
+                        minHeight: sizes.minimumTouch,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing.sm,
+                        paddingHorizontal: spacing.sm,
+                        borderRadius: radius.sm,
+                        backgroundColor: pressed ? colors.skySoft : colors.transparent,
+                      })}
+                    >
+                      <View
+                        style={{
+                          width: 22,
+                          height: 22,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: radius.full,
+                          borderWidth: 2,
+                          borderColor: isDefault ? colors.accent : colors.border,
+                        }}
+                      >
+                        {isDefault ? (
+                          <View
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: radius.full,
+                              backgroundColor: colors.accent,
+                            }}
+                          />
+                        ) : null}
+                      </View>
+                      <AppText
+                        variant="bodyMedium"
+                        style={{ color: isDefault ? colors.accent : colors.inkMuted }}
+                      >
+                        {isDefault ? 'Default website' : 'Set as default'}
+                      </AppText>
+                    </Pressable>
                   </View>
                 );
               })}
 
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={`Add another downloader website for ${platform.label}`}
                 onPress={() => addDownloader(platform.id)}
                 style={({ pressed }) => ({
                   minHeight: sizes.minimumTouch,
                   alignItems: 'center',
                   justifyContent: 'center',
+                  borderWidth: 1,
+                  borderColor: colors.border,
                   borderRadius: radius.md,
                   backgroundColor: pressed ? colors.accentSoft : colors.transparent,
                 })}
               >
                 <AppText variant="bodyMedium" style={{ color: colors.accent }}>
-                  + Add URL
+                  {setting.websites.length === 0 ? 'Add downloader website' : 'Add another website'}
                 </AppText>
               </Pressable>
             </SurfaceCard>
@@ -252,31 +432,40 @@ export function SettingsScreen() {
         })}
       </View>
 
-      {message ? (
+      {feedback ? (
         <AppText
           accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
           selectable
-          variant="caption"
-          style={{ color: message.includes('saved') ? colors.success : colors.danger }}
+          variant="bodyMedium"
+          style={{ color: feedback.tone === 'success' ? colors.success : colors.danger }}
         >
-          {message}
+          {feedback.text}
         </AppText>
       ) : null}
 
       <Pressable
         accessibilityRole="button"
+        accessibilityState={{ disabled: !hasUnsavedChanges }}
+        disabled={!hasUnsavedChanges}
         onPress={handleSave}
         style={({ pressed }) => ({
           minHeight: sizes.button,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: pressed ? colors.accentPressed : colors.accent,
+          backgroundColor: !hasUnsavedChanges
+            ? colors.border
+            : pressed
+              ? colors.accentPressed
+              : colors.accent,
           borderRadius: radius.lg,
           borderCurve: 'continuous',
-          boxShadow: shadows.raised,
+          boxShadow: hasUnsavedChanges ? shadows.raised : 'none',
         })}
       >
-        <AppText variant="button">Save downloader websites</AppText>
+        <AppText variant="button" style={{ color: hasUnsavedChanges ? colors.white : colors.inkMuted }}>
+          {hasUnsavedChanges ? 'Save changes' : 'All changes saved'}
+        </AppText>
       </Pressable>
 
       <Pressable
