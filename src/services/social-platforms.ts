@@ -43,9 +43,14 @@ export const emptyDownloaderSettings: DownloaderSettings = {
 };
 
 export function createEmptyDownloaderSettings(): DownloaderSettings {
-  return Object.fromEntries(
-    socialPlatforms.map((platform) => [platform.id, { websites: [] }]),
-  ) as DownloaderSettings;
+  return {
+    instagram: { websites: [] },
+    tiktok: { websites: [] },
+    facebook: { websites: [] },
+    xhs: { websites: [] },
+    x: { websites: [] },
+    douyin: { websites: [] },
+  };
 }
 
 function matchesHost(hostname: string, allowedHost: string) {
