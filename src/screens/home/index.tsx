@@ -18,6 +18,7 @@ import {
   buildDownloaderUrl,
   detectSocialPlatform,
   getDownloaderSettings,
+  getDefaultDownloaderUrl,
 } from '@/services/downloader-settings';
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
@@ -91,7 +92,9 @@ export function HomeScreen() {
 
     if (socialPlatform) {
       try {
-        const downloaderTemplate = getDownloaderSettings()[socialPlatform.id];
+        const downloaderTemplate = getDefaultDownloaderUrl(
+          getDownloaderSettings()[socialPlatform.id],
+        );
         if (!downloaderTemplate) {
           throw new Error(`Set a downloader website for ${socialPlatform.label} in Settings first.`);
         }

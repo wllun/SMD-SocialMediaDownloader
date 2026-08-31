@@ -6,7 +6,17 @@ export type SocialPlatformId =
   | 'x'
   | 'douyin';
 
-export type DownloaderSettings = Record<SocialPlatformId, string>;
+export type DownloaderWebsite = {
+  id: string;
+  url: string;
+};
+
+export type PlatformDownloaderSettings = {
+  websites: DownloaderWebsite[];
+  defaultWebsiteId?: string;
+};
+
+export type DownloaderSettings = Record<SocialPlatformId, PlatformDownloaderSettings>;
 
 export type SocialPlatform = {
   id: SocialPlatformId;
@@ -24,13 +34,19 @@ export const socialPlatforms: readonly SocialPlatform[] = [
 ] as const;
 
 export const emptyDownloaderSettings: DownloaderSettings = {
-  instagram: '',
-  tiktok: '',
-  facebook: '',
-  xhs: '',
-  x: '',
-  douyin: '',
+  instagram: { websites: [] },
+  tiktok: { websites: [] },
+  facebook: { websites: [] },
+  xhs: { websites: [] },
+  x: { websites: [] },
+  douyin: { websites: [] },
 };
+
+export function createEmptyDownloaderSettings(): DownloaderSettings {
+  return Object.fromEntries(
+    socialPlatforms.map((platform) => [platform.id, { websites: [] }]),
+  ) as DownloaderSettings;
+}
 
 function matchesHost(hostname: string, allowedHost: string) {
   return hostname === allowedHost || hostname.endsWith(`.${allowedHost}`);
@@ -51,18 +67,27 @@ export function detectSocialPlatform(value: string): SocialPlatform | undefined 
 
 export function validateDownloaderSettings(settings: DownloaderSettings) {
   for (const platform of socialPlatforms) {
-    const value = settings[platform.id].trim();
-    if (!value) continue;
-    let url;
-    try {
-      url = new URL(value.replace('{url}', 'https%3A%2F%2Fexample.com%2Fpost'));
-    } catch {
-      throw new Error(`${platform.label} downloader URL is invalid.`);
+    const setting = settings[platform.id];
+    if (setting.websites.length > 0 && !setting.websites.some(({ id }) => id === setting.defaultWebsiteId)) {
+      throw new Error(`Choose a default downloader for ${platform.label}.`);
     }
-    if (url.protocol !== 'https:') {
-      throw new Error(`${platform.label} downloader must use HTTPS.`);
+
+    for (const website of setting.websites) {
+      let url;
+      try {
+        url = new URL(website.url.replace('{url}', 'https%3A%2F%2Fexample.com%2Fpost'));
+      } catch {
+        throw new Error(`${platform.label} downloader URL is invalid.`);
+      }
+      if (url.protocol !== 'https:') {
+        throw new Error(`${platform.label} downloader must use HTTPS.`);
+      }
     }
   }
+}
+
+export function getDefaultDownloaderUrl(setting: PlatformDownloaderSettings) {
+  return setting.websites.find(({ id }) => id === setting.defaultWebsiteId)?.url;
 }
 
 export function buildDownloaderUrl(template: string, postUrl: string) {
