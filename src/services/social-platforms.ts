@@ -26,11 +26,11 @@ export type SocialPlatform = {
 
 export const socialPlatforms: readonly SocialPlatform[] = [
   { id: 'instagram', label: 'Instagram', hosts: ['instagram.com'] },
-  { id: 'tiktok', label: 'TikTok', hosts: ['tiktok.com'] },
   { id: 'facebook', label: 'Facebook', hosts: ['facebook.com', 'fb.watch', 'fb.com'] },
+  { id: 'tiktok', label: 'TikTok', hosts: ['tiktok.com'] },
+  { id: 'douyin', label: '抖音', hosts: ['douyin.com', 'iesdouyin.com'] },
   { id: 'xhs', label: 'XHS / Xiaohongshu', hosts: ['xiaohongshu.com', 'xhslink.com'] },
   { id: 'x', label: 'X / Twitter', hosts: ['x.com', 'twitter.com'] },
-  { id: 'douyin', label: 'Douyin', hosts: ['douyin.com', 'iesdouyin.com'] },
 ] as const;
 
 export const emptyDownloaderSettings: DownloaderSettings = {
