@@ -21,11 +21,11 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="library">
-        <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="queue">
+        <NativeTabs.Trigger.Label>Queue</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'folder', selected: 'folder.fill' }}
-          md={{ default: 'folder', selected: 'folder' }}
+          sf={{ default: 'arrow.down.circle', selected: 'arrow.down.circle.fill' }}
+          md={{ default: 'download', selected: 'download' }}
         />
       </NativeTabs.Trigger>
 

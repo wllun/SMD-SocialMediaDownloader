@@ -1,21 +1,11 @@
 import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import type { DownloadQueueItem } from '@/providers/download-queue-provider';
 import { colors, radius, sizes, spacing } from '@/theme';
 
-export type DownloadItemData = {
-  id: string;
-  title: string;
-  meta: string;
-  date: string;
-  url: string;
-  status: 'downloading' | 'failed';
-  error?: string;
-  progress?: number;
-};
-
 type DownloadItemProps = {
-  item: DownloadItemData;
+  item: DownloadQueueItem;
   isBusy?: boolean;
   onCopy?: () => void;
   onRemove?: () => void;
@@ -30,12 +20,7 @@ export function DownloadItem({
   onRetry,
 }: DownloadItemProps) {
   return (
-    <View
-      style={{
-        gap: spacing.sm,
-        paddingVertical: spacing.md,
-      }}
-    >
+    <View style={{ gap: spacing.sm, paddingVertical: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
         <View
           style={{
