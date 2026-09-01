@@ -1,4 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
+import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -18,8 +19,27 @@ import {
   detectSocialPlatform,
   getDownloaderSettings,
   getDefaultDownloaderUrl,
+  type SocialPlatformId,
 } from '@/services/downloader-settings';
 import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
+
+const platformIcons: Record<SocialPlatformId, number> = {
+  instagram: require('../../../assets/social/instagram.svg'),
+  facebook: require('../../../assets/social/facebook.svg'),
+  tiktok: require('../../../assets/social/tiktok.svg'),
+  douyin: require('../../../assets/social/tiktok.svg'),
+  xhs: require('../../../assets/social/xiaohongshu.svg'),
+  x: require('../../../assets/social/x.svg'),
+};
+
+const supportedPlatforms: readonly { id: SocialPlatformId; label: string }[] = [
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'facebook', label: 'Facebook' },
+  { id: 'tiktok', label: 'TikTok' },
+  { id: 'douyin', label: '抖音' },
+  { id: 'xhs', label: 'XHS' },
+  { id: 'x', label: 'X' },
+];
 
 function isSupportedUrl(value: string) {
   try {
@@ -244,6 +264,52 @@ export function HomeScreen() {
               {isAnalyzing ? 'Analyzing…' : isDownloading ? 'Downloading…' : 'Download'}
             </AppText>
           </Pressable>
+        </View>
+      </View>
+
+      <View style={{ gap: spacing.md }}>
+        <View style={{ gap: spacing.xs }}>
+          <AppText variant="section">Supported platforms</AppText>
+          <AppText variant="subhead">
+            Choose any post from these platforms, or use a direct file link.
+          </AppText>
+        </View>
+
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          {supportedPlatforms.map((platform) => (
+            <View
+              key={platform.id}
+              style={{
+                width: '48%',
+                minHeight: sizes.sourceChip,
+                flexGrow: 1,
+                flexBasis: 148,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.sm,
+                paddingHorizontal: spacing.md,
+                borderRadius: radius.md,
+                borderCurve: 'continuous',
+                borderWidth: 1,
+                borderColor: colors.borderSoft,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <Image
+                accessible={false}
+                contentFit="contain"
+                source={platformIcons[platform.id]}
+                style={{ width: 24, height: 24 }}
+              />
+              <AppText
+                variant="caption"
+                numberOfLines={1}
+                style={{ flexShrink: 1, color: colors.ink }}
+              >
+                {platform.label}
+              </AppText>
+            </View>
+          ))}
         </View>
       </View>
     </ScrollView>
