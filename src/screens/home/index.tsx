@@ -24,12 +24,6 @@ import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
 
 import { DownloadItem, type DownloadItemData } from './download-item';
 
-const initialDownloads: DownloadItemData[] = [
-  { id: '1', title: 'Mountain sunrise', meta: 'MP4  ·  1080p', date: 'Today' },
-  { id: '2', title: 'Weekend city guide', meta: 'MP4  ·  720p', date: 'Yesterday' },
-  { id: '3', title: 'Focus playlist', meta: 'MP3  ·  320 kbps', date: 'Yesterday' },
-];
-
 function isSupportedUrl(value: string) {
   try {
     const url = new URL(value.trim());
@@ -55,12 +49,8 @@ export function HomeScreen() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string>();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [downloads, setDownloads] = useState(initialDownloads);
+  const [downloads, setDownloads] = useState<DownloadItemData[]>([]);
 
-  const queuedItem = useMemo(
-    () => downloads.find((item) => item.progress !== undefined),
-    [downloads],
-  );
   const detectedPlatform = useMemo(() => detectSocialPlatform(url), [url]);
 
   async function handlePaste() {
@@ -70,6 +60,91 @@ export function HomeScreen() {
       setError(undefined);
     } catch {
       setError('Clipboard access is unavailable. Paste the link manually.');
+    }
+  }
+
+  async function runDirectDownload(downloadUrl: string, existingId?: string) {
+    const hostname = new URL(downloadUrl).hostname.replace(/^www\./, '');
+    const id = existingId ?? String(Date.now());
+    const title = `Media from ${hostname}`;
+
+    setError(undefined);
+    setIsAnalyzing(true);
+    setDownloads((current) => {
+      const pendingItem: DownloadItemData = {
+        id,
+        title,
+        meta: 'Direct file',
+        date: existingId ? 'Retrying' : 'Downloading',
+        url: downloadUrl,
+        status: 'downloading',
+        progress: 0,
+      };
+
+      return existingId
+        ? current.map((item) => (item.id === id ? pendingItem : item))
+        : [pendingItem, ...current];
+    });
+
+    try {
+      const mediaUrls = [downloadUrl];
+      let result: Awaited<ReturnType<typeof downloadMedia>> | undefined;
+
+      for (let index = 0; index < mediaUrls.length; index += 1) {
+        result = await downloadMedia(mediaUrls[index], (assetProgress) => {
+          const progress = Math.round(((index + assetProgress / 100) / mediaUrls.length) * 100);
+          setDownloads((current) =>
+            current.map((item) => (item.id === id ? { ...item, progress } : item)),
+          );
+        });
+      }
+
+      if (!result) throw new Error('No downloadable media was returned.');
+
+      const location =
+        result.savedTo === 'device-library'
+          ? 'Saved to your device library'
+          : result.savedTo === 'browser'
+            ? 'Saved by your browser'
+            : 'Opened the device save menu';
+
+      setDownloads((current) => current.filter((item) => item.id !== id));
+      Alert.alert(
+        'Download complete',
+        mediaUrls.length > 1 ? `${mediaUrls.length} files saved. ${location}.` : location,
+      );
+      if (!existingId) setUrl('');
+    } catch (downloadError) {
+      const rawMessage =
+        downloadError instanceof Error ? downloadError.message : 'The download failed.';
+      const message = rawMessage.includes('Network request failed')
+        ? 'Could not reach that file. On web, the source must allow cross-origin downloads.'
+        : rawMessage;
+
+      setDownloads((current) =>
+        current.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                date: 'Failed',
+                error: message,
+                progress: undefined,
+                status: 'failed',
+              }
+            : item,
+        ),
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
+  async function handleCopyFailedUrl(item: DownloadItemData) {
+    try {
+      await Clipboard.setStringAsync(item.url);
+      Alert.alert('Link copied', 'The failed download URL is ready to paste.');
+    } catch {
+      Alert.alert('Could not copy link', 'Select and copy the URL from the failed item instead.');
     }
   }
 
@@ -87,10 +162,9 @@ export function HomeScreen() {
       return;
     }
 
-    setError(undefined);
-    setIsAnalyzing(true);
-
     if (socialPlatform) {
+      setError(undefined);
+      setIsAnalyzing(true);
       try {
         const downloaderTemplate = getDefaultDownloaderUrl(
           getDownloaderSettings()[socialPlatform.id],
@@ -132,67 +206,7 @@ export function HomeScreen() {
       return;
     }
 
-    const hostname = new URL(url.trim()).hostname.replace(/^www\./, '');
-    const id = String(Date.now());
-    const title = `Media from ${hostname}`;
-
-    setDownloads((current) => [
-      {
-        id,
-        title,
-        meta: 'Direct file',
-        date: 'Downloading',
-        progress: 0,
-      },
-      ...current,
-    ]);
-
-    try {
-      const mediaUrls = [url.trim()];
-      let result: Awaited<ReturnType<typeof downloadMedia>> | undefined;
-
-      for (let index = 0; index < mediaUrls.length; index += 1) {
-        result = await downloadMedia(mediaUrls[index], (assetProgress) => {
-          const progress = Math.round(((index + assetProgress / 100) / mediaUrls.length) * 100);
-          setDownloads((current) =>
-            current.map((item) => (item.id === id ? { ...item, progress } : item)),
-          );
-        });
-      }
-
-      if (!result) throw new Error('No downloadable media was returned.');
-
-      const location =
-        result.savedTo === 'device-library'
-          ? 'Saved to your device library'
-          : result.savedTo === 'browser'
-            ? 'Saved by your browser'
-            : 'Opened the device save menu';
-
-      setDownloads((current) =>
-        current.map((item) =>
-          item.id === id
-            ? { ...item, title: result.fileName, date: 'Just now', progress: undefined }
-            : item,
-        ),
-      );
-      Alert.alert(
-        'Download complete',
-        mediaUrls.length > 1 ? `${mediaUrls.length} files saved. ${location}.` : location,
-      );
-      setUrl('');
-    } catch (downloadError) {
-      const message =
-        downloadError instanceof Error ? downloadError.message : 'The download failed.';
-      setDownloads((current) => current.filter((item) => item.id !== id));
-      setError(
-        message.includes('Network request failed')
-          ? 'Could not reach that file. On web, the source must allow cross-origin downloads.'
-          : message,
-      );
-    } finally {
-      setIsAnalyzing(false);
-    }
+    await runDirectDownload(url.trim());
   }
 
   return (
@@ -333,13 +347,30 @@ export function HomeScreen() {
             }}
           >
             <AppText variant="headline" style={{ color: colors.accent }}>
-              {queuedItem ? '1' : '0'}
+              {downloads.length}
             </AppText>
           </View>
         </View>
 
-        {queuedItem ? (
-          <DownloadItem item={queuedItem} />
+        {downloads.length > 0 ? (
+          <View>
+            {downloads.map((item, index) => (
+              <View key={item.id}>
+                <DownloadItem
+                  isBusy={isAnalyzing}
+                  item={item}
+                  onCopy={() => handleCopyFailedUrl(item)}
+                  onRemove={() =>
+                    setDownloads((current) => current.filter((entry) => entry.id !== item.id))
+                  }
+                  onRetry={() => runDirectDownload(item.url, item.id)}
+                />
+                {index < downloads.length - 1 ? (
+                  <View style={{ height: 1, backgroundColor: colors.borderSoft }} />
+                ) : null}
+              </View>
+            ))}
+          </View>
         ) : (
           <View style={{ paddingVertical: spacing.lg, alignItems: 'center', gap: spacing.xs }}>
             <AppText variant="bodyMedium">Nothing waiting</AppText>
@@ -348,28 +379,6 @@ export function HomeScreen() {
         )}
       </SurfaceCard>
 
-      <View style={{ gap: spacing.md }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <AppText variant="section" style={{ flex: 1 }}>
-            Recent
-          </AppText>
-          <AppText variant="bodyMedium" style={{ color: colors.accent }}>
-            View all  ›
-          </AppText>
-        </View>
-        <SurfaceCard style={{ paddingVertical: 0 }}>
-          {downloads
-            .filter((item) => item.progress === undefined)
-            .map((item, index, items) => (
-              <View key={item.id}>
-                <DownloadItem item={item} />
-                {index < items.length - 1 ? (
-                  <View style={{ height: 1, backgroundColor: colors.borderSoft }} />
-                ) : null}
-              </View>
-            ))}
-        </SurfaceCard>
-      </View>
     </ScrollView>
   );
 }
