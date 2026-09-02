@@ -83,10 +83,7 @@ export function QueueScreen() {
           </View>
         ) : (
           <View style={{ paddingVertical: spacing.xl, alignItems: 'center', gap: spacing.xs }}>
-            <AppText variant="bodyMedium">Queue is empty</AppText>
-            <AppText variant="subhead" style={{ textAlign: 'center' }}>
-              Downloads started from Home will appear here.
-            </AppText>
+            {/* <AppText variant="bodyMedium">Queue is empty</AppText> */}
             <Link href="/" asChild>
               <Pressable
                 accessibilityRole="button"
