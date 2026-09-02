@@ -301,13 +301,8 @@ export function SettingsScreen() {
                     contentFit="contain"
                     source={platformIcons[platform.id]}
                     style={{
-                      width:
-                        platform.id === 'tiktok' || platform.id === 'douyin'
-                          ? 30
-                          : platform.id === 'x'
-                            ? 28
-                            : 34,
-                      height: 34,
+                      width: 24,
+                      height: 24,
                     }}
                   />
                 </View>
