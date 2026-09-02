@@ -50,7 +50,7 @@ export function SettingsScreen() {
     createEmptyDownloaderSettings(),
   );
   const [expandedPlatformId, setExpandedPlatformId] =
-    useState<SocialPlatformId>('instagram');
+    useState<SocialPlatformId | null>(null);
   const [feedback, setFeedback] = useState<Feedback>();
   const [touchedWebsiteIds, setTouchedWebsiteIds] = useState<Record<string, boolean>>({});
   const [savedSnapshot, setSavedSnapshot] = useState(() =>
@@ -183,7 +183,7 @@ export function SettingsScreen() {
           setDownloaders(cleared);
           setSavedSnapshot(JSON.stringify(cleared));
           setTouchedWebsiteIds({});
-          setExpandedPlatformId('instagram');
+          setExpandedPlatformId(null);
           setFeedback({ tone: 'success', text: 'All downloader websites cleared.' });
         },
       },
@@ -269,7 +269,11 @@ export function SettingsScreen() {
                 accessibilityLabel={`${platform.label}, ${status}`}
                 accessibilityHint={`${isExpanded ? 'Collapse' : 'Expand'} downloader settings`}
                 accessibilityState={{ expanded: isExpanded }}
-                onPress={() => setExpandedPlatformId(platform.id)}
+                onPress={() =>
+                  setExpandedPlatformId((current) =>
+                    current === platform.id ? null : platform.id,
+                  )
+                }
                 style={({ pressed }) => ({
                   minHeight: 76,
                   flexDirection: 'row',
