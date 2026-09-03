@@ -21,10 +21,12 @@
 
 ## Manual Settings tests
 
-- Save valid HTTPS URLs and restart the app to confirm persistence.
+- Enter or paste a valid HTTPS URL, verify automatic-save feedback, and restart
+  the app to confirm persistence.
 - Reject HTTP and malformed URLs.
-- Save a mixture of configured and blank platforms.
-- Clear all settings and confirm social handoff is disabled.
+- Automatically save a mixture of configured and blank platforms.
+- Verify Cancel preserves settings in the clear-all confirmation dialog.
+- Confirm Clear all removes every setting and disables social handoff.
 
 ## Device tests
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -13,7 +13,7 @@ import {
   type DownloaderSettings,
   type SocialPlatformId,
 } from '@/services/downloader-settings';
-import { colors, radius, shadows, sizes, spacing, typography } from '@/theme';
+import { colors, radius, sizes, spacing, typography } from '@/theme';
 
 type Feedback = { tone: 'success' | 'error'; text: string };
 
@@ -53,18 +53,46 @@ export function SettingsScreen() {
     useState<SocialPlatformId | null>(null);
   const [feedback, setFeedback] = useState<Feedback>();
   const [touchedWebsiteIds, setTouchedWebsiteIds] = useState<Record<string, boolean>>({});
-  const [savedSnapshot, setSavedSnapshot] = useState(() =>
-    JSON.stringify(createEmptyDownloaderSettings()),
-  );
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const savedSnapshotRef = useRef(JSON.stringify(createEmptyDownloaderSettings()));
 
   useEffect(() => {
     const stored = getDownloaderSettings();
+    savedSnapshotRef.current = JSON.stringify(stored);
     setDownloaders(stored);
-    setSavedSnapshot(JSON.stringify(stored));
+    setHasLoaded(true);
   }, []);
 
-  const currentSnapshot = useMemo(() => JSON.stringify(downloaders), [downloaders]);
-  const hasUnsavedChanges = currentSnapshot !== savedSnapshot;
+  useEffect(() => {
+    if (!hasLoaded) return;
+
+    const hasInvalidWebsite = socialPlatforms.some((platform) =>
+      downloaders[platform.id].websites.some((website) => getUrlError(website.url)),
+    );
+    if (hasInvalidWebsite) return;
+
+    const currentSnapshot = JSON.stringify(downloaders);
+    if (currentSnapshot === savedSnapshotRef.current) return;
+
+    const saveTimer = setTimeout(() => {
+      try {
+        const saved = saveDownloaderSettings(downloaders);
+        const savedSnapshot = JSON.stringify(saved);
+        savedSnapshotRef.current = savedSnapshot;
+        if (savedSnapshot !== currentSnapshot) setDownloaders(saved);
+        setTouchedWebsiteIds({});
+        setFeedback({ tone: 'success', text: 'Changes saved automatically.' });
+      } catch (error) {
+        setFeedback({
+          tone: 'error',
+          text: error instanceof Error ? error.message : 'Could not save settings.',
+        });
+      }
+    }, 400);
+
+    return () => clearTimeout(saveTimer);
+  }, [downloaders, hasLoaded]);
+
   const configuredCount = useMemo(
     () =>
       socialPlatforms.filter((platform) =>
@@ -138,56 +166,42 @@ export function SettingsScreen() {
     setFeedback(undefined);
   }
 
-  function handleSave() {
-    const invalidEntries = socialPlatforms.flatMap((platform) =>
-      downloaders[platform.id].websites
-        .filter((website) => getUrlError(website.url))
-        .map((website) => ({ platformId: platform.id, website })),
-    );
-
-    if (invalidEntries.length > 0) {
-      setTouchedWebsiteIds((current) => ({
-        ...current,
-        ...Object.fromEntries(invalidEntries.map(({ website }) => [website.id, true])),
-      }));
-      setExpandedPlatformId(invalidEntries[0].platformId);
-      setFeedback({
-        tone: 'error',
-        text: `Fix ${invalidEntries.length} invalid ${invalidEntries.length === 1 ? 'URL' : 'URLs'} before saving.`,
-      });
-      return;
-    }
-
+  function clearAllWebsites() {
     try {
-      const saved = saveDownloaderSettings(downloaders);
-      setDownloaders(saved);
-      setSavedSnapshot(JSON.stringify(saved));
+      const cleared = saveDownloaderSettings(createEmptyDownloaderSettings());
+      savedSnapshotRef.current = JSON.stringify(cleared);
+      setDownloaders(cleared);
       setTouchedWebsiteIds({});
-      setFeedback({ tone: 'success', text: 'Downloader websites saved on this device.' });
+      setExpandedPlatformId(null);
+      setFeedback({ tone: 'success', text: 'All downloader websites cleared.' });
     } catch (error) {
       setFeedback({
         tone: 'error',
-        text: error instanceof Error ? error.message : 'Could not save settings.',
+        text: error instanceof Error ? error.message : 'Could not clear settings.',
       });
     }
   }
 
   function handleClear() {
-    Alert.alert('Clear downloader websites?', 'Social links will not open until configured again.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear all',
-        style: 'destructive',
-        onPress: () => {
-          const cleared = saveDownloaderSettings(createEmptyDownloaderSettings());
-          setDownloaders(cleared);
-          setSavedSnapshot(JSON.stringify(cleared));
-          setTouchedWebsiteIds({});
-          setExpandedPlatformId(null);
-          setFeedback({ tone: 'success', text: 'All downloader websites cleared.' });
-        },
-      },
-    ]);
+    const message =
+      'This removes every saved downloader website from this device. Social links will not open until configured again.';
+
+    if (process.env.EXPO_OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(`Clear all websites?\n\n${message}`)) {
+        clearAllWebsites();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Clear all websites?',
+      message,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear all', style: 'destructive', onPress: clearAllWebsites },
+      ],
+      { cancelable: true },
+    );
   }
 
   return (
@@ -208,7 +222,7 @@ export function SettingsScreen() {
       <View style={{ gap: spacing.sm }}>
         <AppText variant="display">Downloader Settings</AppText>
         <AppText variant="body" style={{ color: colors.inkMuted }}>
-          Choose a trusted website for each platform.
+          Choose a trusted website for each platform. Valid changes save automatically.
         </AppText>
       </View>
 
@@ -630,42 +644,7 @@ export function SettingsScreen() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ disabled: !hasUnsavedChanges }}
-        disabled={!hasUnsavedChanges}
-        onPress={handleSave}
-        style={({ pressed }) => ({
-          minHeight: sizes.button,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: !hasUnsavedChanges
-            ? colors.border
-            : pressed
-              ? colors.accentPressed
-              : colors.accent,
-          borderRadius: radius.lg,
-          borderCurve: 'continuous',
-          boxShadow: hasUnsavedChanges ? shadows.raised : 'none',
-        })}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <SymbolView
-            accessible={false}
-            aria-hidden={true}
-            name={{ ios: 'square.and.arrow.down', android: 'save', web: 'save' }}
-            size={22}
-            tintColor={hasUnsavedChanges ? colors.white : colors.inkMuted}
-          />
-          <AppText
-            variant="button"
-            style={{ color: hasUnsavedChanges ? colors.white : colors.inkMuted }}
-          >
-            {hasUnsavedChanges ? 'Save changes' : 'All changes saved'}
-          </AppText>
-        </View>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="button"
+        accessibilityLabel="Clear all downloader websites"
         onPress={handleClear}
         style={({ pressed }) => ({
           minHeight: sizes.minimumTouch,

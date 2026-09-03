@@ -12,6 +12,7 @@
 - Vertically centered Home download controls and a bottom-aligned supported
   template caption with an icon-only platform strip.
 - Local persistent downloader settings for six social platforms.
+- Automatic persistence for valid settings and confirmation before clearing all websites.
 - HTTPS validation and optional {url} template substitution.
 - Modal in-app downloader WebView on Android/iOS.
 - Close, page-back, reload, and external-browser fallback controls.
