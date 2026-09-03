@@ -1,6 +1,6 @@
 # Project State
 
-**Last updated:** 2026-08-26
+**Last updated:** 2026-09-03
 **Lifecycle stage:** Functional prototype
 **Overall status:** In-app WebView handoff implemented
 **Release:** None
@@ -9,6 +9,8 @@
 
 - Root-level Expo Router application for Android, iOS, and web.
 - Home URL input, clipboard paste, platform detection, and destination confirmation.
+- Vertically centered Home download controls and a bottom-aligned supported
+  template caption with an icon-only platform strip.
 - Local persistent downloader settings for six social platforms.
 - HTTPS validation and optional {url} template substitution.
 - Modal in-app downloader WebView on Android/iOS.

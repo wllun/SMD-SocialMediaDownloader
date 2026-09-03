@@ -148,16 +148,25 @@ export function HomeScreen() {
       keyboardShouldPersistTaps="handled"
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{
+        flexGrow: 1,
         width: '100%',
         maxWidth: sizes.maxContent,
         alignSelf: 'center',
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.xxxl * 3,
-        gap: spacing.xxl,
+        paddingTop: spacing.lg,
+        paddingBottom: process.env.EXPO_OS === 'web' ? spacing.xxxl * 2 : spacing.lg,
       }}
     >
-      <View style={{ alignItems: 'center', gap: spacing.md }}>
+      <View
+        style={{
+          flexGrow: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: spacing.md,
+          paddingTop: spacing.xxxl,
+          paddingBottom: spacing.xl,
+        }}
+      >
         <AppText variant="brand">SMD</AppText>
         <View style={{ alignItems: 'center', gap: spacing.sm }}>
           <AppText variant="display" style={{ textAlign: 'center' }}>
@@ -267,48 +276,39 @@ export function HomeScreen() {
         </View>
       </View>
 
-      <View style={{ gap: spacing.md }}>
-        <View style={{ gap: spacing.xs }}>
-          <AppText variant="section">Supported platforms</AppText>
-          <AppText variant="subhead">
-            Choose any post from these platforms, or use a direct file link.
-          </AppText>
-        </View>
-
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+      <View
+        style={{
+          alignItems: 'center',
+          alignSelf: 'center',
+          gap: spacing.xs,
+        }}
+      >
+        <AppText variant="caption" style={{ color: colors.inkMuted, textAlign: 'center' }}>
+          Supported template
+        </AppText>
+        <View
+          accessible
+          accessibilityLabel={`Supported platforms: ${supportedPlatforms
+            .map((platform) => platform.label)
+            .join(', ')}`}
+          style={{
+            minHeight: sizes.minimumTouch,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: spacing.lg,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.xs,
+          }}
+        >
           {supportedPlatforms.map((platform) => (
-            <View
+            <Image
               key={platform.id}
-              style={{
-                width: '48%',
-                minHeight: sizes.sourceChip,
-                flexGrow: 1,
-                flexBasis: 148,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.sm,
-                paddingHorizontal: spacing.md,
-                borderRadius: radius.md,
-                borderCurve: 'continuous',
-                borderWidth: 1,
-                borderColor: colors.borderSoft,
-                backgroundColor: colors.surface,
-              }}
-            >
-              <Image
-                accessible={false}
-                contentFit="contain"
-                source={platformIcons[platform.id]}
-                style={{ width: 24, height: 24 }}
-              />
-              <AppText
-                variant="caption"
-                numberOfLines={1}
-                style={{ flexShrink: 1, color: colors.ink }}
-              >
-                {platform.label}
-              </AppText>
-            </View>
+              accessible={false}
+              contentFit="contain"
+              source={platformIcons[platform.id]}
+              style={{ width: 22, height: 22 }}
+            />
           ))}
         </View>
       </View>
