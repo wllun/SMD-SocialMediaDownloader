@@ -7,7 +7,7 @@ website separately for each supported social platform.
 
 1. Open the SMD **Settings** tab.
 2. Enter an HTTPS website URL under the appropriate platform.
-3. Press **Save downloader websites**.
+3. Wait for the **Changes saved automatically** confirmation.
 4. Return Home and paste a post link.
 5. Review the external destination before opening it inside SMD.
 
@@ -27,7 +27,8 @@ link so it can be pasted there.
 - Avoid sites requesting passwords, cookies, tokens, or payment.
 - Treat advertisements and download buttons as untrusted.
 - Use downloaded material only when you own it or have permission.
-- Clear a configured site if its ownership or behavior changes.
+- Clear a configured site if its ownership or behavior changes. Clearing all
+  websites requires confirmation.
 
 On Android and iOS, the site opens in SMD. Use **Browser ↗** if a site refuses to
 run in a WebView or its download does not work there. On web, SMD opens a new tab.

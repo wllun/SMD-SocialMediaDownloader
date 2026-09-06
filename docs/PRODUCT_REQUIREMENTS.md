@@ -34,6 +34,8 @@ platform-specific downloader website without remembering multiple sites.
 | FR-010 | Open configured sites in an in-app WebView on Android/iOS. | Must |
 | FR-011 | Keep Close and external-browser fallback controls available. | Must |
 | FR-012 | Block insecure HTTP navigation inside the WebView. | Must |
+| FR-013 | Automatically save valid downloader-setting changes. | Must |
+| FR-014 | Confirm before clearing every configured website. | Must |
 
 ## Non-goals
 
@@ -51,6 +53,8 @@ platform-specific downloader website without remembering multiple sites.
 - A recognized link without configuration directs the user to Settings.
 - Unknown hosts are rejected.
 - Invalid or non-HTTPS downloader settings cannot be saved.
+- Valid settings save automatically without a separate save button.
+- Clearing all websites requires an explicit destructive confirmation.
 - Settings survive an app restart.
 - Direct media URLs continue to use the in-app downloader.
 - WebView sites that expose supported file URLs use SMD's native save flow.

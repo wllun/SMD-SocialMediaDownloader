@@ -16,9 +16,10 @@
 ### Settings
 
 - Stores one HTTPS website URL per platform.
+- Automatically persists valid settings after a short input delay.
 - Uses Expo SQLite persistence on Android/iOS and browser localStorage on web.
 - Supports {url} as an encoded-link placeholder.
-- Allows all external website preferences to be cleared.
+- Requires confirmation before all external website preferences are cleared.
 
 ### Direct file downloader
 

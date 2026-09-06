@@ -31,9 +31,10 @@ npm install
 npm start
 ~~~
 
-Open **Settings**, enter an HTTPS downloader website for each desired platform,
-and save. A plain site URL opens its home page. A URL containing {url} has that
-placeholder replaced with the encoded post link, if the site supports prefill.
+Open **Settings** and enter an HTTPS downloader website for each desired platform.
+Valid changes save automatically. A plain site URL opens its home page. A URL
+containing {url} has that placeholder replaced with the encoded post link, if the
+site supports prefill.
 
 Example format only:
 

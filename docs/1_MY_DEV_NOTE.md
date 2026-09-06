@@ -16,9 +16,16 @@ such as react-native-webview.
 3. Build the physical-device APK
     cd C:\SMDBuild\android
     .\gradlew.bat app:assembleRelease -PreactNativeArchitectures=arm64-v8a "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+## This build coverage for most modern Android phones: 
+    .\gradlew.bat app:assembleRelease "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
 
 4. Wait until `BUILD SUCCESSFUL`
 
+# ADB INSTALL
 5. Connect and update the app
     adb devices
     adb install -r "C:\SMDBuild\android\app\build\outputs\apk\release\app-release.apk"
+
+# Send APK
+5. The APK is located at: `C:\SMDBuild\android\app\build\outputs\apk\release\app-release.apk`. Find it and send to someone to install. May rename it `SMD.apk` to be clearer.
+
