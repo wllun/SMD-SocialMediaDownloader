@@ -36,6 +36,10 @@ Valid changes save automatically. A plain site URL opens its home page. A URL
 containing {url} has that placeholder replaced with the encoded post link, if the
 site supports prefill.
 
+The platform icons at the bottom of Home are shortcuts to each platform's
+configured default downloader website. If a platform is not configured, SMD
+offers to open Settings instead.
+
 Example format only:
 
 ~~~text

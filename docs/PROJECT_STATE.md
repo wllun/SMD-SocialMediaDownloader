@@ -10,7 +10,9 @@
 - Root-level Expo Router application for Android, iOS, and web.
 - Home URL input, clipboard paste, platform detection, and destination confirmation.
 - Vertically centered Home download controls and a bottom-aligned supported
-  template caption with an icon-only platform strip.
+  template caption with an icon-only platform shortcut strip.
+- Tappable platform shortcuts that open each configured default downloader in
+  the existing in-app downloader route.
 - Local persistent downloader settings for six social platforms.
 - Automatic persistence for valid settings and confirmation before clearing all websites.
 - HTTPS validation and optional {url} template substitution.

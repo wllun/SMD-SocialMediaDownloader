@@ -41,6 +41,8 @@ const supportedPlatforms: readonly { id: SocialPlatformId; label: string }[] = [
   { id: 'x', label: 'X' },
 ];
 
+const platformShortcutSize = process.env.EXPO_OS === 'android' ? 48 : sizes.minimumTouch;
+
 function isSupportedUrl(value: string) {
   try {
     const url = new URL(value.trim());
@@ -69,6 +71,45 @@ export function HomeScreen() {
   const { isDownloading, runDirectDownload } = useDownloadQueue();
 
   const detectedPlatform = useMemo(() => detectSocialPlatform(url), [url]);
+
+  function handlePlatformShortcut(platform: (typeof supportedPlatforms)[number]) {
+    try {
+      const downloaderTemplate = getDefaultDownloaderUrl(
+        getDownloaderSettings()[platform.id],
+      );
+
+      if (!downloaderTemplate) {
+        const message = `Set a downloader website for ${platform.label} in Settings first.`;
+        if (process.env.EXPO_OS === 'web') {
+          setError(message);
+          router.push('/settings');
+          return;
+        }
+
+        Alert.alert(
+          `${platform.label} downloader not set`,
+          message,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => router.push('/settings') },
+          ],
+          { cancelable: true },
+        );
+        return;
+      }
+
+      const downloaderUrl = buildDownloaderUrl(downloaderTemplate, '');
+      setError(undefined);
+      router.push(
+        {
+          pathname: '/downloader',
+          params: { platform: platform.label, url: downloaderUrl },
+        } as unknown as Href,
+      );
+    } catch (openError) {
+      setError(openError instanceof Error ? openError.message : 'Could not open the downloader.');
+    }
+  }
 
   async function handlePaste() {
     try {
@@ -287,28 +328,38 @@ export function HomeScreen() {
           Supported template
         </AppText>
         <View
-          accessible
-          accessibilityLabel={`Supported platforms: ${supportedPlatforms
-            .map((platform) => platform.label)
-            .join(', ')}`}
           style={{
-            minHeight: sizes.minimumTouch,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: spacing.lg,
-            paddingHorizontal: spacing.lg,
+            gap: spacing.sm,
             paddingVertical: spacing.xs,
           }}
         >
           {supportedPlatforms.map((platform) => (
-            <Image
+            <Pressable
               key={platform.id}
-              accessible={false}
-              contentFit="contain"
-              source={platformIcons[platform.id]}
-              style={{ width: 22, height: 22 }}
-            />
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${platform.label} downloader`}
+              accessibilityHint="Opens the configured downloader website inside SMD"
+              onPress={() => handlePlatformShortcut(platform)}
+              style={({ pressed }) => ({
+                width: platformShortcutSize,
+                height: platformShortcutSize,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? colors.accentSoft : colors.transparent,
+                borderRadius: radius.full,
+                opacity: pressed ? 0.72 : 1,
+              })}
+            >
+              <Image
+                accessible={false}
+                contentFit="contain"
+                source={platformIcons[platform.id]}
+                style={{ width: 22, height: 22 }}
+              />
+            </Pressable>
           ))}
         </View>
       </View>

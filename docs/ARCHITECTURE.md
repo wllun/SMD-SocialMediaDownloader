@@ -12,6 +12,8 @@
 - Copies the original post URL.
 - Confirms the external destination hostname.
 - Opens a modal downloader route inside SMD on Android and iOS.
+- Exposes icon shortcuts that read each platform's default setting and open the
+  same downloader route without requiring a post URL first.
 
 ### Settings
 

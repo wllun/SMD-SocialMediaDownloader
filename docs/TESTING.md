@@ -18,6 +18,10 @@
 - Verify confirmation displays the external hostname.
 - Verify Cancel does not open the downloader.
 - Verify plain and {url} settings behave as expected.
+- Tap every configured platform icon and verify it opens the matching default
+  downloader in the in-app route.
+- Tap an unconfigured platform icon and verify the Settings prompt and navigation.
+- Verify each icon has a visible pressed state and a screen-reader button label.
 
 ## Manual Settings tests
 

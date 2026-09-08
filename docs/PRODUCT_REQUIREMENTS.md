@@ -36,6 +36,7 @@ platform-specific downloader website without remembering multiple sites.
 | FR-012 | Block insecure HTTP navigation inside the WebView. | Must |
 | FR-013 | Automatically save valid downloader-setting changes. | Must |
 | FR-014 | Confirm before clearing every configured website. | Must |
+| FR-015 | Let each Home platform icon open its configured default downloader. | Must |
 
 ## Non-goals
 
@@ -55,6 +56,8 @@ platform-specific downloader website without remembering multiple sites.
 - Invalid or non-HTTPS downloader settings cannot be saved.
 - Valid settings save automatically without a separate save button.
 - Clearing all websites requires an explicit destructive confirmation.
+- Tapping a configured Home platform icon opens that downloader; tapping an
+  unconfigured icon offers a route to Settings.
 - Settings survive an app restart.
 - Direct media URLs continue to use the in-app downloader.
 - WebView sites that expose supported file URLs use SMD's native save flow.
