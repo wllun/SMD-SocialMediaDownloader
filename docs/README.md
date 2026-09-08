@@ -15,6 +15,7 @@ user-configured external downloader websites.
 | [SECURITY_AND_COMPLIANCE.md](SECURITY_AND_COMPLIANCE.md) | Trust and safe-use requirements |
 | [TESTING.md](TESTING.md) | Test and release checks |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Development commands |
+| [REACT_NATIVE_TUTORIAL.md](REACT_NATIVE_TUTORIAL.md) | Beginner course using this project |
 | [ROADMAP.md](ROADMAP.md) | Delivery sequence |
 | [decisions/](decisions/) | Architecture decisions |
 | [1_MY_DEV_NOTE.md](1_MY_DEV_NOTE.md) | Local APK build commands |

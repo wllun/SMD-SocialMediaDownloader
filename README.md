@@ -75,3 +75,5 @@ Expo SQLite on Android/iOS and browser localStorage on web.
 - Store distribution still requires legal and app-review assessment.
 
 See [docs/README.md](docs/README.md) for the full documentation index.
+Start with [Learn React Native by Building SMD](docs/REACT_NATIVE_TUTORIAL.md)
+for a beginner-friendly course based on this codebase.
