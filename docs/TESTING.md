@@ -34,6 +34,10 @@
 
 ## Device tests
 
+- Verify Home, Queue, and Settings tabs remain visible and tappable above gesture
+  navigation and three-button navigation areas.
+- Open and close the keyboard on Home and Settings and verify the tab bar returns
+  to the correct safe-area position.
 - Android WebView navigation, download interception, and device save result.
 - iOS WebView navigation, file-download event, and Files/Photos result.
 - Close, page-back, reload, and Browser fallback controls.

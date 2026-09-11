@@ -20,7 +20,9 @@
 - Close, page-back, reload, and external-browser fallback controls.
 - HTTPS-only navigation and supported native file-download interception.
 - Direct media-file downloads with native progress and device saving.
-- Home, Library, and Settings tabs.
+- Home, Queue, and Settings tabs.
+- Stable mobile tab navigation with explicit bottom safe-area spacing so the tab
+  bar remains above Android and iOS system navigation areas.
 
 ## Removed or superseded
 
