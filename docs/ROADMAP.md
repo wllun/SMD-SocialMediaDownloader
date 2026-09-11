@@ -16,7 +16,6 @@
 
 - Add unit tests for hostname detection and {url} generation.
 - Perform Android and iOS WebView/device-save testing on configured sites.
-- Replace mock Library entries with real history or remove them.
 - Improve accessibility and localized error labels.
 
 ## Before distribution

@@ -45,5 +45,4 @@
 1. Configure trusted test websites on a development device.
 2. Test each supported hostname, redirect flow, and actual device save result.
 3. Add automated tests for detection, templates, and validation.
-4. Replace mock Library entries with accurate history or remove them.
-5. Decide whether this is a private APK or public store product.
+4. Decide whether this is a private APK or public store product.

@@ -9,7 +9,7 @@ assets/                 App icons and splash assets
 docs/                   Product and engineering documentation
 src/app/                Expo Router routes
 src/components/         Shared UI components
-src/screens/            Home, Library, Settings, and downloader screens
+src/screens/            Home, Queue, Settings, and downloader screens
 src/services/           Detection, settings, and direct downloads
 src/theme/              Design tokens
 app.json                Expo configuration
