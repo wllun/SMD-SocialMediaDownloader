@@ -9,6 +9,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -16,7 +17,7 @@ import { AppText } from '@/components/app-text';
 import { useDownloadQueue } from '@/providers/download-queue-provider';
 import {
   buildDownloaderUrl,
-  detectSocialPlatform,
+  detectSocialPlatforms,
   getDownloaderSettings,
   getDefaultDownloaderUrl,
   type SocialPlatformId,
@@ -30,6 +31,8 @@ const platformIcons: Record<SocialPlatformId, number> = {
   douyin: require('../../../assets/social/tiktok.svg'),
   xhs: require('../../../assets/social/xiaohongshu.svg'),
   x: require('../../../assets/social/x.svg'),
+  youtube_video: require('../../../assets/social/youtube.svg'),
+  youtube_mp3: require('../../../assets/social/youtube-mp3.svg'),
 };
 
 const supportedPlatforms: readonly { id: SocialPlatformId; label: string }[] = [
@@ -39,6 +42,8 @@ const supportedPlatforms: readonly { id: SocialPlatformId; label: string }[] = [
   { id: 'douyin', label: '抖音' },
   { id: 'xhs', label: 'XHS' },
   { id: 'x', label: 'X' },
+  { id: 'youtube_video', label: 'YouTube Video' },
+  { id: 'youtube_mp3', label: 'YouTube to MP3' },
 ];
 
 const platformShortcutSize = process.env.EXPO_OS === 'android' ? 48 : sizes.minimumTouch;
@@ -65,12 +70,22 @@ function isDirectMediaUrl(value: string) {
 }
 
 export function HomeScreen() {
+  const { width } = useWindowDimensions();
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string>();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedPlatformId, setSelectedPlatformId] = useState<SocialPlatformId>();
   const { isDownloading, runDirectDownload } = useDownloadQueue();
 
-  const detectedPlatform = useMemo(() => detectSocialPlatform(url), [url]);
+  const detectedPlatforms = useMemo(() => detectSocialPlatforms(url), [url]);
+  const detectedPlatform =
+    detectedPlatforms.find((platform) => platform.id === selectedPlatformId) ??
+    detectedPlatforms[0];
+  const platformGridWidth =
+    width < 480
+      ? platformShortcutSize * 4 + spacing.sm * 3
+      : platformShortcutSize * supportedPlatforms.length +
+        spacing.sm * (supportedPlatforms.length - 1);
 
   function handlePlatformShortcut(platform: (typeof supportedPlatforms)[number]) {
     try {
@@ -129,7 +144,7 @@ export function HomeScreen() {
       return;
     }
 
-    const socialPlatform = detectSocialPlatform(url);
+    const socialPlatform = detectedPlatform;
     if (!isDirectMediaUrl(url) && !socialPlatform) {
       setError('Enter a direct media URL or a supported social-media post URL.');
       return;
@@ -278,7 +293,50 @@ export function HomeScreen() {
             </AppText>
           ) : null}
 
-          {!error && detectedPlatform ? (
+          {!error && detectedPlatforms.length > 1 ? (
+            <View style={{ gap: spacing.sm }}>
+              <AppText variant="caption" style={{ color: colors.inkMuted }}>
+                YouTube link detected. Choose an output:
+              </AppText>
+              <View
+                accessibilityLabel="YouTube output format"
+                style={{ flexDirection: 'row', gap: spacing.sm }}
+              >
+                {detectedPlatforms.map((platform) => {
+                  const isSelected = platform.id === detectedPlatform?.id;
+                  const outputLabel = platform.id === 'youtube_mp3' ? 'MP3' : 'Video';
+
+                  return (
+                    <Pressable
+                      key={platform.id}
+                      accessibilityRole="radio"
+                      accessibilityLabel={`Download YouTube as ${outputLabel}`}
+                      accessibilityState={{ checked: isSelected }}
+                      onPress={() => setSelectedPlatformId(platform.id)}
+                      style={({ pressed }) => ({
+                        minHeight: platformShortcutSize,
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: isSelected ? colors.accent : colors.border,
+                        borderRadius: radius.full,
+                        backgroundColor: isSelected ? colors.accentSoft : colors.surface,
+                        opacity: pressed ? 0.7 : 1,
+                      })}
+                    >
+                      <AppText
+                        variant="bodyMedium"
+                        style={{ color: isSelected ? colors.accent : colors.inkMuted }}
+                      >
+                        {outputLabel}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ) : !error && detectedPlatform ? (
             <AppText variant="caption" style={{ color: colors.success }}>
               Detected: {detectedPlatform.label}. The post link will be copied before opening its
               configured downloader.
@@ -332,7 +390,10 @@ export function HomeScreen() {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
+            flexWrap: 'wrap',
             gap: spacing.sm,
+            width: '100%',
+            maxWidth: platformGridWidth,
             paddingVertical: spacing.xs,
           }}
         >

@@ -13,7 +13,8 @@
   template caption with an icon-only platform shortcut strip.
 - Tappable platform shortcuts that open each configured default downloader in
   the existing in-app downloader route.
-- Local persistent downloader settings for six social platforms.
+- Local persistent downloader settings for eight platform workflows, including
+  separate YouTube video and YouTube-to-MP3 choices.
 - Automatic persistence for valid settings and confirmation before clearing all websites.
 - HTTPS validation and optional {url} template substitution.
 - Modal in-app downloader WebView on Android/iOS.

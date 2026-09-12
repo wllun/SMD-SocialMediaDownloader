@@ -167,11 +167,13 @@ type SocialPlatformId =
   | 'facebook'
   | 'xhs'
   | 'x'
-  | 'douyin';
+  | 'douyin'
+  | 'youtube_video'
+  | 'youtube_mp3';
 ~~~
 
 This is safer than accepting any string. TypeScript can warn if code tries to
-use an unsupported value such as `'youtube'` before YouTube has been added.
+use an unsupported value such as `'snapchat'` before Snapchat has been added.
 
 An object type describes required fields:
 
@@ -351,10 +353,11 @@ You should be able to explain what causes the Home screen to rerender.
 Not every value needs its own state. A value calculated from other state is
 called derived data.
 
-Home derives the detected platform from the current URL:
+Home derives every matching workflow from the current URL. Most hosts match one
+workflow; YouTube matches both Video and MP3:
 
 ~~~tsx
-const detectedPlatform = useMemo(() => detectSocialPlatform(url), [url]);
+const detectedPlatforms = useMemo(() => detectSocialPlatforms(url), [url]);
 ~~~
 
 `useMemo` recalculates when `url` changes. For tiny calculations it is often not
@@ -362,7 +365,7 @@ necessary, but it documents that the result is derived rather than independently
 editable.
 
 URL rules live in service functions so they can be reused and tested without
-rendering a screen. `detectSocialPlatform` parses the URL and compares its host
+rendering a screen. `detectSocialPlatforms` parses the URL and compares its host
 against explicit platform hosts. It does not use unsafe substring matching.
 
 The Settings screen demonstrates a larger controlled form:

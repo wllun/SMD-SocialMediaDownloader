@@ -9,6 +9,7 @@ import { readSetting, writeSetting } from './settings-storage';
 export {
   buildDownloaderUrl,
   detectSocialPlatform,
+  detectSocialPlatforms,
   emptyDownloaderSettings,
   createEmptyDownloaderSettings,
   getDefaultDownloaderUrl,

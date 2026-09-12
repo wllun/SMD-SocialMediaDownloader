@@ -12,6 +12,8 @@
 ## Manual Home tests
 
 - Paste each supported platform URL and verify the detected label.
+- Paste a YouTube URL, switch between Video and MP3, and verify each choice opens
+  its own configured default downloader.
 - Verify unknown and malformed URLs are rejected.
 - Verify a missing setting produces a Settings instruction.
 - Verify the post URL is copied before the in-app downloader opens.

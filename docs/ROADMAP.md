@@ -6,7 +6,8 @@
 
 - Root-level Expo project and three-tab UI.
 - Direct media-file downloading.
-- Detection for Instagram, TikTok, Facebook, XHS, X, and Douyin.
+- Detection for Instagram, TikTok, Facebook, XHS, X, Douyin, and YouTube, with
+  separate YouTube video and MP3 downloader choices.
 - Persistent platform-specific website settings.
 - Clipboard copy, destination confirmation, and in-app WebView launch.
 - HTTPS navigation controls, native download interception, and browser fallback.
