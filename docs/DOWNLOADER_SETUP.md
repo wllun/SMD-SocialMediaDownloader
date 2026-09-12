@@ -1,7 +1,8 @@
 # External Downloader Setup
 
-SMD does not include a downloader website. Users choose and configure an HTTPS
-website separately for each supported social platform.
+SMD does not include a downloader website. Users choose and configure one or
+more HTTPS websites separately for each supported workflow. YouTube video and
+YouTube-to-MP3 have independent settings.
 
 ## Configure
 

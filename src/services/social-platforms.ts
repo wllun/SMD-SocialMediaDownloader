@@ -4,7 +4,9 @@ export type SocialPlatformId =
   | 'facebook'
   | 'xhs'
   | 'x'
-  | 'douyin';
+  | 'douyin'
+  | 'youtube_video'
+  | 'youtube_mp3';
 
 export type DownloaderWebsite = {
   id: string;
@@ -31,6 +33,8 @@ export const socialPlatforms: readonly SocialPlatform[] = [
   { id: 'douyin', label: '抖音', hosts: ['douyin.com', 'iesdouyin.com'] },
   { id: 'xhs', label: 'XHS / Xiaohongshu', hosts: ['xiaohongshu.com', 'xhslink.com'] },
   { id: 'x', label: 'X / Twitter', hosts: ['x.com', 'twitter.com'] },
+  { id: 'youtube_video', label: 'YouTube Video', hosts: ['youtube.com', 'youtu.be'] },
+  { id: 'youtube_mp3', label: 'YouTube to MP3', hosts: ['youtube.com', 'youtu.be'] },
 ] as const;
 
 export const emptyDownloaderSettings: DownloaderSettings = {
@@ -40,6 +44,8 @@ export const emptyDownloaderSettings: DownloaderSettings = {
   xhs: { websites: [] },
   x: { websites: [] },
   douyin: { websites: [] },
+  youtube_video: { websites: [] },
+  youtube_mp3: { websites: [] },
 };
 
 export function createEmptyDownloaderSettings(): DownloaderSettings {
@@ -50,6 +56,8 @@ export function createEmptyDownloaderSettings(): DownloaderSettings {
     xhs: { websites: [] },
     x: { websites: [] },
     douyin: { websites: [] },
+    youtube_video: { websites: [] },
+    youtube_mp3: { websites: [] },
   };
 }
 
@@ -57,17 +65,21 @@ function matchesHost(hostname: string, allowedHost: string) {
   return hostname === allowedHost || hostname.endsWith(`.${allowedHost}`);
 }
 
-export function detectSocialPlatform(value: string): SocialPlatform | undefined {
+export function detectSocialPlatforms(value: string): SocialPlatform[] {
   try {
     const url = new URL(value.trim());
-    if (!['https:', 'http:'].includes(url.protocol)) return undefined;
+    if (!['https:', 'http:'].includes(url.protocol)) return [];
     const hostname = url.hostname.toLowerCase();
-    return socialPlatforms.find((platform) =>
+    return socialPlatforms.filter((platform) =>
       platform.hosts.some((host) => matchesHost(hostname, host)),
     );
   } catch {
-    return undefined;
+    return [];
   }
+}
+
+export function detectSocialPlatform(value: string): SocialPlatform | undefined {
+  return detectSocialPlatforms(value)[0];
 }
 
 export function validateDownloaderSettings(settings: DownloaderSettings) {

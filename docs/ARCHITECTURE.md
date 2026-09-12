@@ -11,13 +11,14 @@
 - Reads the matching downloader preference.
 - Copies the original post URL.
 - Confirms the external destination hostname.
+- Lets YouTube links select either the video or MP3 downloader workflow.
 - Opens a modal downloader route inside SMD on Android and iOS.
 - Exposes icon shortcuts that read each platform's default setting and open the
   same downloader route without requiring a post URL first.
 
 ### Settings
 
-- Stores one HTTPS website URL per platform.
+- Stores one or more HTTPS website URLs per workflow and tracks the default.
 - Automatically persists valid settings after a short input delay.
 - Uses Expo SQLite persistence on Android/iOS and browser localStorage on web.
 - Supports {url} as an encoded-link placeholder.

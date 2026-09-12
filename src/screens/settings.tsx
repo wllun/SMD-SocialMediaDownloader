@@ -24,6 +24,8 @@ const platformIcons: Record<SocialPlatformId, number> = {
   douyin: require('../../assets/social/tiktok.svg'),
   xhs: require('../../assets/social/xiaohongshu.svg'),
   x: require('../../assets/social/x.svg'),
+  youtube_video: require('../../assets/social/youtube.svg'),
+  youtube_mp3: require('../../assets/social/youtube-mp3.svg'),
 };
 
 function getUrlError(value: string) {

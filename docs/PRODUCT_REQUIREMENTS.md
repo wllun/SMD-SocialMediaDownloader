@@ -23,8 +23,8 @@ platform-specific downloader website without remembering multiple sites.
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | FR-001 | Validate pasted HTTP/HTTPS URLs. | Must |
-| FR-002 | Detect Instagram, TikTok, Facebook, XHS, X, and Douyin. | Must |
-| FR-003 | Store one downloader URL per platform locally. | Must |
+| FR-002 | Detect Instagram, TikTok, Facebook, XHS, X, Douyin, and YouTube. | Must |
+| FR-003 | Store one or more downloader URLs per workflow and select a default locally. | Must |
 | FR-004 | Require downloader URLs to use HTTPS. | Must |
 | FR-005 | Copy the post URL before opening the downloader. | Must |
 | FR-006 | Show the destination hostname and require confirmation. | Must |
@@ -37,6 +37,7 @@ platform-specific downloader website without remembering multiple sites.
 | FR-013 | Automatically save valid downloader-setting changes. | Must |
 | FR-014 | Confirm before clearing every configured website. | Must |
 | FR-015 | Let each Home platform icon open its configured default downloader. | Must |
+| FR-016 | Let users choose YouTube video download or YouTube-to-MP3 conversion. | Must |
 
 ## Non-goals
 
@@ -52,6 +53,8 @@ platform-specific downloader website without remembering multiple sites.
 - A recognized link with a configured site copies successfully and opens inside
   SMD on Android/iOS only after confirmation.
 - A recognized link without configuration directs the user to Settings.
+- A YouTube link lets the user choose Video or MP3 before opening the matching
+  configured downloader.
 - Unknown hosts are rejected.
 - Invalid or non-HTTPS downloader settings cannot be saved.
 - Valid settings save automatically without a separate save button.
