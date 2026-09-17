@@ -50,8 +50,11 @@ export default function AppTabs() {
             }}
           >
             {state.routes.map((route, index) => {
+              // Expo Router can discover extra route files; only show supported tabs.
+              if (!Object.prototype.hasOwnProperty.call(tabLabels, route.name)) return null;
+
               const isFocused = state.index === index;
-              const label = tabLabels[route.name] ?? route.name;
+              const label = tabLabels[route.name];
               const options = descriptors[route.key].options;
 
               const onPress = () => {

@@ -36,6 +36,8 @@
 
 ## Device tests
 
+- Verify the mobile menu contains only Home, Queue, and Settings; no Library tab
+  or automatically discovered extra route should appear.
 - Verify Home, Queue, and Settings tabs remain visible and tappable above gesture
   navigation and three-button navigation areas.
 - Open and close the keyboard on Home and Settings and verify the tab bar returns
