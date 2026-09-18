@@ -9,9 +9,9 @@ import {
   Pressable,
   ScrollView,
   TextInput,
-  useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
 import { useDownloadQueue } from '@/providers/download-queue-provider';
@@ -70,7 +70,7 @@ function isDirectMediaUrl(value: string) {
 }
 
 export function HomeScreen() {
-  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string>();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -81,11 +81,6 @@ export function HomeScreen() {
   const detectedPlatform =
     detectedPlatforms.find((platform) => platform.id === selectedPlatformId) ??
     detectedPlatforms[0];
-  const platformGridWidth =
-    width < 480
-      ? platformShortcutSize * 4 + spacing.sm * 3
-      : platformShortcutSize * supportedPlatforms.length +
-        spacing.sm * (supportedPlatforms.length - 1);
 
   function handlePlatformShortcut(platform: (typeof supportedPlatforms)[number]) {
     try {
@@ -200,7 +195,7 @@ export function HomeScreen() {
 
   return (
     <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
+      contentInsetAdjustmentBehavior="never"
       keyboardShouldPersistTaps="handled"
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{
@@ -209,7 +204,7 @@ export function HomeScreen() {
         maxWidth: sizes.maxContent,
         alignSelf: 'center',
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.lg,
+        paddingTop: spacing.lg + (process.env.EXPO_OS === 'web' ? 0 : insets.top),
         paddingBottom: process.env.EXPO_OS === 'web' ? spacing.xxxl * 2 : spacing.lg,
       }}
     >
@@ -379,21 +374,24 @@ export function HomeScreen() {
         style={{
           alignItems: 'center',
           alignSelf: 'center',
+          width: '100%',
           gap: spacing.xs,
         }}
       >
         <AppText variant="caption" style={{ color: colors.inkMuted, textAlign: 'center' }}>
-          Supported platforms
+          Supported template
         </AppText>
-        <View
-          style={{
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          style={{ width: '100%', flexGrow: 0 }}
+          contentContainerStyle={{
+            flexGrow: 1,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            flexWrap: 'wrap',
             gap: spacing.sm,
-            width: '100%',
-            maxWidth: platformGridWidth,
             paddingVertical: spacing.xs,
           }}
         >
@@ -422,7 +420,7 @@ export function HomeScreen() {
               />
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
       </View>
     </ScrollView>
   );

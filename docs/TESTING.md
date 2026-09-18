@@ -36,6 +36,10 @@
 
 ## Device tests
 
+- Verify Home has no index header, the Supported template shortcuts stay in one
+  horizontally scrollable row, and the three-tab pill stays above system navigation.
+- Before APK builds, synchronize with scripts/sync-apk-source.ps1 and verify
+  C:\SMDBuild\src\app has no obsolete root index.tsx, library.tsx, or settings.tsx.
 - Verify the mobile menu contains only Home, Queue, and Settings; no Library tab
   or automatically discovered extra route should appear.
 - Verify Home, Queue, and Settings tabs remain visible and tappable above gesture

@@ -23,7 +23,9 @@ export default function RootLayout() {
       <DownloadQueueProvider>
         <StatusBar style="dark" />
         <Stack
+          initialRouteName="(tabs)"
           screenOptions={{
+            headerShown: false,
             contentStyle: { backgroundColor: colors.background },
             headerBackButtonDisplayMode: 'minimal',
             headerShadowVisible: false,
@@ -36,6 +38,7 @@ export default function RootLayout() {
             name="downloader"
             options={{
               presentation: 'modal',
+              headerShown: true,
               title: 'Downloader',
             }}
           />
