@@ -4,18 +4,9 @@ The Expo project lives at the repository root. Run these commands in PowerShell.
 The clean prebuild step is required after adding or updating native dependencies
 such as react-native-webview.
 
-1. From the original repository, synchronize the latest code to the short build folder:
-
-    ~~~powershell
-    cd "C:\Users\User\Desktop\React App\SMD-SocialMediaDownloader"
-    .\scripts\sync-apk-source.ps1
-    ~~~
-
-    On another laptop, first cd to that laptop's original repository path.
-    The script preserves the previous build src under C:\SMDBuild\.source-backups
-    and copies a fresh source tree. Do not use a plain robocopy /E alone: it leaves
-    deleted routes such as src/app/index.tsx and library.tsx in the build copy,
-    causing an index header, duplicate screens, or a missing bottom menu.
+1. Copy the latest code to the short build folder
+    `robocopy "C:\Users\behwl\OneDrive\Documents\ReactNative\SMD-SocialMediaDownloader" "C:\SMDBuild" /MIR /XD .git node_modules android ios .expo dist web-build .source-backups`
+    [Company Laptop Cmd] : `robocopy "C:\Users\User\Desktop\React App\SMD-SocialMediaDownloader" "C:\SMDBuild" /MIR /XD .git node_modules android ios .expo dist web-build .source-backups`
 
 2. Update the generated project
     cd C:\SMDBuild
